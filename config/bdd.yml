@@ -1,4 +1,4 @@
 hote:           localhost
-base:           base
+base:           framework
 utilisateur:    root
 mot_de_passe:   root
