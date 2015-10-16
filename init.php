@@ -1,9 +1,9 @@
 <?php
-
-if (file_exists($_SERVER['DOCUMENT_ROOT'].'/modules/Base/config/bdd.yml') === true) {
-    $szFichier = $_SERVER['DOCUMENT_ROOT'].'/modules/Base/config/bdd.yml';
-} else {
-    $szFichier = str_replace('/'.$GLOBALS['szNomDossierProjet'].'/', '/core/', $_SERVER['DOCUMENT_ROOT']).'/modules/Base/config/bdd.yml';
+// echo $_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd.yml<br/>';
+if (file_exists($_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd.yml') === true) {
+    $szFichier = $_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd.yml';
+} elseif (file_exists($_SERVER['DOCUMENT_ROOT'].'/ressources/base/config/bdd.yml') === true) {
+    $szFichier = $_SERVER['DOCUMENT_ROOT'].'/ressources/base/config/bdd.yml';
 }
 $data = \Spyc::YAMLLoad($szFichier);
 
