@@ -65,14 +65,34 @@ class Bdd extends Utiles
     public function aSelectBDD($szRequete, $aMappingChamps = array(), $szTypeDeDonnee = "")
     {
         $aResultat = array();
+
+        $bNoCache = false;
+        if ((isset($GLOBALS['aParamsAppli']['cache']['base']) === false ||
+                $GLOBALS['aParamsAppli']['cache']['base'] === 'non') ||
+                isset($_REQUEST['bNoCache']) === true) {
+            $bNoCache = true;
+        }
+
+        if ($bNoCache === false) {
+            $objMemCache = new \Memcache;
+            $objMemCache->connect('localhost', 11211) or die ("Could not connect");
+
+            $szCle = md5($szRequete);
+
+            $aRetour = $objMemCache->get($szCle);
+            // echo "$szCle : <pre>".print_r($aRetour, true)."</pre>";
+            echo "cache";
+            if ($aRetour != '') {
+                return $aRetour;
+            }
+        }
+
         $rLien = $this->rConnexion->query($szRequete);
 
         if ( $rLien )
         {
             $aResult = $rLien->fetchAll();
-            // echo "toto";
-// echo "<pre>".print_r($aResult, true)."</pre>";
-// exit;
+
             foreach( $aResult as $objRow )
             {
                 if (count($aMappingChamps)) {
@@ -83,11 +103,11 @@ class Bdd extends Utiles
                         $objResultat = new \StdClass();
                     }
 
-                    foreach ($objRow as $szCle => $szValeur) {
-                        if (isset($aMappingChamps[$szCle])) {
-                            $szCleObjet = $aMappingChamps[$szCle];
+                    foreach ($objRow as $szCleLigne => $szValeur) {
+                        if (isset($aMappingChamps[$szCleLigne])) {
+                            $szCleObjet = $aMappingChamps[$szCleLigne];
                         } else {
-                            $szCleObjet = $szCle;
+                            $szCleObjet = $szCleLigne;
                         }
                         $objResultat->$szCleObjet = $szValeur;
                     }
@@ -97,6 +117,10 @@ class Bdd extends Utiles
                     $aResultat[] = $objRow;
                 }
             }
+        }
+// echo "$szCle : mise en cache\n";
+        if ($bNoCache === false) {
+            $objMemCache->set($szCle, $aResultat, MEMCACHE_COMPRESSED, 1200);
         }
 
         return $aResultat;
