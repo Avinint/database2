@@ -1,7 +1,7 @@
 <?php
 
 namespace APP\Modules\Base\Lib;
-use APP\Core\Lib\Interne\Utiles as Utiles;
+use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
 
 class CorePDO extends \PDO
 {

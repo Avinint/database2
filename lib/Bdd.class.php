@@ -1,7 +1,7 @@
 <?php
 
 namespace APP\Modules\Base\Lib;
-use APP\Core\Lib\Interne\Utiles as Utiles;
+use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
 use APP\Modules\Base\Lib\CorePDO as CorePDO;
 
 class Bdd extends Utiles
