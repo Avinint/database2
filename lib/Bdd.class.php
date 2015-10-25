@@ -68,7 +68,7 @@ class Bdd extends Utiles
 
         $bNoCache = false;
         if ((isset($GLOBALS['aParamsAppli']['cache']['base']) === false ||
-                $GLOBALS['aParamsAppli']['cache']['base'] === 'non') ||
+                $GLOBALS['aParamsAppli']['cache']['base'] == 'non') ||
                 isset($_REQUEST['bNoCache']) === true) {
             $bNoCache = true;
         }
@@ -81,7 +81,7 @@ class Bdd extends Utiles
 
             $aRetour = $objMemCache->get($szCle);
             // echo "$szCle : <pre>".print_r($aRetour, true)."</pre>";
-            // echo "cache";
+            // echo "cache BDD\n";
             if ($aRetour != '') {
                 return $aRetour;
             }
