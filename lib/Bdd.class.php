@@ -82,7 +82,7 @@ class Bdd extends Utiles
 
             $aRetour = $objMemCache->get($szCle);
             // echo "$szCle : <pre>".print_r($aRetour, true)."</pre>";
-            echo "cache BDD\n";
+            // echo "cache BDD\n";
             if ($aRetour != '') {
                 return $aRetour;
             }
