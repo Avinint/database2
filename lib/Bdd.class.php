@@ -26,6 +26,51 @@ class Bdd extends Utiles
         }
     }
 
+    /**
+     * Méthode magique permettant d'intercepter tous les appels à des méthodes
+     * qui n'existent pas.
+     * Nous l'utilisons afin de surcharger éventuellement certaines méthodes.
+     *
+     * @param  string   $szMethode      Méthode à appeler.
+     * @param  array    $aParametres    Paramètres de la méthode.
+     *
+     * @return boolean                  Retourne le résultat de la méthode.
+     */
+    public function __call($szMethode = '', $aParametres = array())
+    {
+        $aRetour = array(
+            'bSurcharge' => false,
+            'bSucces' => false
+        );
+
+        // Si le premier caractère de la méthode est un underscore, on le supprime.
+        if (substr($szMethode, 0, 1) == '_') {
+            $szMethode = substr($szMethode, 1, strlen($szMethode));
+        }
+
+        // On récupère le namespace de la classe courante.
+        $szNameSpaceClasse = get_class($this);
+
+        // On récupère le nom de la classe courante.
+        $aClasse = explode('\\', $szNameSpaceClasse);
+        $szNomClasse = array_pop($aClasse);
+
+        // On prépare le chemin de la classe de surcharge à chercher.
+        $szClasseCible = str_replace($szNomClasse, $szNomClasse.'Surcharge', $szNameSpaceClasse);
+        $szCheminClasseCible = $_SERVER['DOCUMENT_ROOT'].'/modules/'.strtolower($aClasse[2]).'/models/'.$szNomClasse.'Surcharge.class.php';
+
+        // Si la classe de surcharge est présente, on l'instancie et on l'appelle.
+        if (file_exists($szCheminClasseCible)) {
+            $obj = new $szClasseCible();
+            if (method_exists($obj, $szMethode)) {
+                return eval('return $obj->$szMethode('.implode(', ', $aParametres).', $this);');
+            }
+        }
+
+        // S'il n'y a pas eu de surcharge, on appelle la méthode notmale.
+        return eval('return $this->$szMethode('.implode(', ', $aParametres).');');
+    }
+
 
     /**
      * Méthode permettant de se connecter à la base de données
