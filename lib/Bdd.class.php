@@ -1,10 +1,10 @@
 <?php
 
 namespace APP\Modules\Base\Lib;
-use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
+use APP\Core\Lib\Interne\PHP\UndeadBrain as UndeadBrain;
 use APP\Modules\Base\Lib\CorePDO as CorePDO;
 
-class Bdd extends Utiles
+class Bdd  extends UndeadBrain
 {
     /**
      * Ressource de la connexion
@@ -25,6 +25,7 @@ class Bdd extends Utiles
             $this->vConnexionBdd();
         }
     }
+
 
     /**
      * Méthode magique permettant d'intercepter tous les appels à des méthodes
