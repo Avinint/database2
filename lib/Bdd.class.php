@@ -64,12 +64,12 @@ class Bdd  extends UndeadBrain
         if (file_exists($szCheminClasseCible)) {
             $obj = new $szClasseCible();
             if (method_exists($obj, $szMethode)) {
-                return eval('return $obj->$szMethode('.implode(', ', $aParametres).', $this);');
+                return eval('return $obj->$szMethode(\''.implode("', '", $aParametres).'\', $this);');
             }
         }
 
         // S'il n'y a pas eu de surcharge, on appelle la méthode notmale.
-        return eval('return $this->$szMethode('.implode(', ', $aParametres).');');
+        return eval('return $this->$szMethode(\''.implode("', '", $aParametres).'\');');
     }
 
 
