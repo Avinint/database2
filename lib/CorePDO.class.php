@@ -18,6 +18,8 @@ class CorePDO extends \PDO
         // // echo "<pre>$szRequete</pre>";
         // }
 
+        $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
+
         return parent::query($szRequete);
     }
 
