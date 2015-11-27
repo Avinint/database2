@@ -76,6 +76,8 @@ class Bdd  extends UndeadBrain
         }
 
         if ($bNoCache === false) {
+
+            // echo "- Utilisation du cache\n";
             $objMemCache = new \Memcache;
             $objMemCache->connect('localhost', 11211) or die ("Could not connect");
 
