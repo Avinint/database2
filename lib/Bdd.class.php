@@ -91,19 +91,22 @@ class Bdd  extends UndeadBrain
 
         $rLien = $this->rConnexion->query($szRequete);
 
-        if ( $rLien )
-        {
-            $aResult = $rLien->fetchAll();
+        if ($rLien) {
+            $aResult = $rLien->fetchAll(\PDO::FETCH_OBJ);
+
+            // echo "<pre>".print_r($aResult, true)."</pre>";
 
             foreach( $aResult as $objRow )
             {
                 if (count($aMappingChamps)) {
                     if ($szTypeDeDonnee) {
-                        $szTypeDeDonnee = $this->szGetBonType($szTypeDeDonnee, true);
-                        $objResultat = new $szTypeDeDonnee();
+                        // $szTypeDeDonneeAvant = $szTypeDeDonnee;
+                        // $szTypeDeDonnee = $this->szGetBonType($szTypeDeDonnee, true);
+                        // echo $szTypeDeDonnee;
+                        // $objResultat = $this->oNew($szTypeDeDonneeAvant);
                     } else {
-                        $objResultat = new \StdClass();
                     }
+                        $objResultat = new \StdClass();
 
                     foreach ($objRow as $szCleLigne => $szValeur) {
                         if (isset($aMappingChamps[$szCleLigne])) {
@@ -119,6 +122,7 @@ class Bdd  extends UndeadBrain
                     $aResultat[] = $objRow;
                 }
             }
+            // echo "<pre>".print_r($aResultat, true)."</pre>";
         }
 // echo "$szCle : mise en cache\n";
         if ($bNoCache === false) {
