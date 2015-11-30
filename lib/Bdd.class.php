@@ -77,7 +77,6 @@ class Bdd  extends UndeadBrain
 
         if ($bNoCache === false) {
 
-            // echo "- Utilisation du cache\n";
             $objMemCache = new \Memcache;
             $objMemCache->connect('localhost', 11211) or die ("Could not connect");
 
@@ -91,6 +90,7 @@ class Bdd  extends UndeadBrain
             }
         }
 
+        // echo "<pre>$szRequete</pre>";
         $rLien = $this->rConnexion->query($szRequete);
 
         if ($rLien) {
@@ -123,6 +123,7 @@ class Bdd  extends UndeadBrain
                 } else {
                     $aResultat[] = $objRow;
                 }
+            // echo "<pre>".print_r($objRow, true)."</pre>";
             }
             // echo "<pre>".print_r($aResultat, true)."</pre>";
         }
