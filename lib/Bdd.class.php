@@ -78,7 +78,7 @@ class Bdd  extends UndeadBrain
         if ($bNoCache === false) {
 
             $objMemCache = new \Memcache;
-            $objMemCache->connect('localhost', 11211) or die ("Could not connect");
+            $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ("Could not connect");
 
             $szCle = md5($szRequete);
 
