@@ -44,7 +44,6 @@ class Bdd  extends UndeadBrain
             $this->rConnexion->query("SET NAMES utf8;");
 
             $GLOBALS['rConnexionBDD'] = $this->rConnexion;
-
             // echo "-------- après <pre>".print_r($this->rConnexion, true)."</pre>";
         }
         catch( PDOException $e )
