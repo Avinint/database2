@@ -150,4 +150,30 @@ class Bdd  extends UndeadBrain
 
         return $szType;
     }
+
+
+    /**
+     * Convertie les critères d'un champ sous forme de tableau en chaine.
+     *
+     * @param  array  $aRegles Règles du champ.
+     * @return string          Règle du champ.
+     */
+    public function szGetCriteresValidation($aRegles = array())
+    {
+        $szRegle = '';
+
+        foreach ($aRegles as $szCle => $szValeur) {
+
+            if ($szRegle != '') {
+                $szRegle .= ', ';
+            }
+
+            if ($szValeur != '') {
+                $szRegle .= "'".$szCle."' : ".$szValeur;
+            }
+
+        }
+
+        return $szRegle;
+    }
 }
