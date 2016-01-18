@@ -57,21 +57,24 @@ class Bdd  extends UndeadBrain
     /**
      * Méthode qui sélectionne les éléments dans la base de données et retourne un tableau d'objets prêt à être utilisé
      *
-     * @param  string $szRequete      La requête SQL
-     * @param  array  $aMappingChamps Un tableau associatif avec comme clé les champs SQL et comme valeur les attributs à retourner
-     * @param  string $szTypeDeDonnee Type de données
-     * @return array  $aResultat Les résultats
+     * @param  string   $szRequete      La requête SQL.
+     * @param  array    $aMappingChamps Un tableau associatif avec comme clé les champs SQL et comme valeur les attributs à retourner.
+     * @param  boolean  $bNoCache       Désactiver le cache pour certaines requêtes.
+     *
+     * @return array    $aResultat      Les résultats.
      */
-    public function aSelectBDD($szRequete, $aMappingChamps = array(), $szTypeDeDonnee = "")
+    public function aSelectBDD($szRequete, $aMappingChamps = array(), $bNoCache = false)
     {
         $aResultat = array();
 
-        $bNoCache = false;
-        if ((isset($GLOBALS['aParamsAppli']['cache']['base']) === false ||
-                $GLOBALS['aParamsAppli']['cache']['base'] == 'non') ||
-                isset($_REQUEST['bNoCache']) === true ||
-                isset($_REQUEST['szIdBloc']) === true && $GLOBALS['aModules'][$_REQUEST['szModule']]['blocs'][$_REQUEST['szIdBloc']]['cache']['html'] == 'non') {
-            $bNoCache = true;
+        // $bNoCache = false;
+        if ($bNoCache === false) {
+            if ((isset($GLOBALS['aParamsAppli']['cache']['base']) === false ||
+                    $GLOBALS['aParamsAppli']['cache']['base'] == 'non') ||
+                    isset($_REQUEST['bNoCache']) === true ||
+                    isset($_REQUEST['szIdBloc']) === true && $GLOBALS['aModules'][$_REQUEST['szModule']]['blocs'][$_REQUEST['szIdBloc']]['cache']['html'] == 'non') {
+                $bNoCache = true;
+            }
         }
 
         if ($bNoCache === false) {
@@ -100,14 +103,7 @@ class Bdd  extends UndeadBrain
             foreach( $aResult as $objRow )
             {
                 if (count($aMappingChamps)) {
-                    if ($szTypeDeDonnee) {
-                        // $szTypeDeDonneeAvant = $szTypeDeDonnee;
-                        // $szTypeDeDonnee = $this->szGetBonType($szTypeDeDonnee, true);
-                        // echo $szTypeDeDonnee;
-                        // $objResultat = $this->oNew($szTypeDeDonneeAvant);
-                    } else {
-                    }
-                        $objResultat = new \StdClass();
+                    $objResultat = new \StdClass();
 
                     foreach ($objRow as $szCleLigne => $szValeur) {
                         if (isset($aMappingChamps[$szCleLigne])) {
