@@ -23,7 +23,11 @@ class CorePDO extends \PDO
         return parent::query($szRequete);
     }
 
-    // public function aSelectBDD($szRequete = '', $aMappingChamps = array(), $szAlias = '')
+    public function aSelectBDD($szRequete = '', $aMappingChamps = array(), $szAlias = '')
+    {
+        $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
+
+        return parent::aSelectBDD($szRequete);
     // {
     //     $objMemCache = new \Memcache;
     //     $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ("Could not connect");
@@ -40,5 +44,5 @@ class CorePDO extends \PDO
     //         return $aRetour;
     //     }
 
-    // }
+    }
 }
