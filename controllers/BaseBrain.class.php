@@ -14,7 +14,9 @@ class BaseBrain
      */
     public function __construct($objUndeadBrain = '')
     {
-        if (file_exists($_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd_'.$GLOBALS['aParamsAppli']['environnement'].'.yml') === true) {
+        if (file_exists($_SERVER['DOCUMENT_ROOT'].'/modules/base/config/conf.yml') === true) {
+            $szFichier = $_SERVER['DOCUMENT_ROOT'].'/modules/base/config/conf.yml';
+        } else if (file_exists($_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd_'.$GLOBALS['aParamsAppli']['environnement'].'.yml') === true) {
             $szFichier = $_SERVER['DOCUMENT_ROOT'].'/modules/base/config/bdd_'.$GLOBALS['aParamsAppli']['environnement'].'.yml';
         } elseif (file_exists($_SERVER['DOCUMENT_ROOT'].'/ressources/base/config/bdd_'.$GLOBALS['aParamsAppli']['environnement'].'.yml') === true) {
             $szFichier = $_SERVER['DOCUMENT_ROOT'].'/ressources/base/config/bdd_'.$GLOBALS['aParamsAppli']['environnement'].'.yml';

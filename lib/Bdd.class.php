@@ -172,4 +172,34 @@ class Bdd  extends UndeadBrain
 
         return $szRegle;
     }
+
+
+    /**
+     * Récupère les éléments en fonction des critères de recherche
+     *
+     * @param  array   $aRecherche  Critères de recherche
+     * @param  integer $nStart      LIMIT clause arg1
+     * @param  integer $nNbElements LIMIT clause arg2
+     * @param  array   $aOrdre      Ordre de tri 1
+     * @param  string  $szOrderBy   Ordre de tri 2
+     *
+     * @return array               Liste des éléments
+     */
+
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $aOrdre = array(), $szOrderBy = '')
+    {
+        $szRequete = $this->szGetSelect($aRecherche, $szOrderBy);
+
+      if ($nNbElements && $nNbElements != 0) {
+          $szRequete .= " LIMIT ".$nStart.", ".$nNbElements;
+      }
+
+        // echo "<pre>$szRequete</pre>";
+
+        // echo "<pre>".print_r($this->aMappingChamps, true)."</pre>";
+        $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+        // echo "<pre>".print_r($aResultats, true)."</pre>";
+
+        return $aResultats;
+    }
 }
