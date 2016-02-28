@@ -14,6 +14,12 @@ class Bdd  extends UndeadBrain
     public $szVersion;
 
     /**
+     * Tableau de correspondance des champs et de leurs alias.
+     * @var array
+     */
+    protected $aMappingChamps;
+
+    /**
      * Constructeur de la classe
      *
      * @return void
@@ -178,15 +184,14 @@ class Bdd  extends UndeadBrain
      * Récupère les éléments en fonction des critères de recherche
      *
      * @param  array   $aRecherche  Critères de recherche
-     * @param  integer $nStart      LIMIT clause arg1
-     * @param  integer $nNbElements LIMIT clause arg2
-     * @param  array   $aOrdre      Ordre de tri 1
-     * @param  string  $szOrderBy   Ordre de tri 2
+     * @param  integer $nStart      Numéro de début.
+     * @param  integer $nNbElements Nombre de résultats.
+     * @param  string  $szOrderBy   Ordre de tri.
      *
-     * @return array               Liste des éléments
+     * @return array                Liste des éléments
      */
 
-    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $aOrdre = array(), $szOrderBy = '')
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '')
     {
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy);
 
@@ -196,10 +201,33 @@ class Bdd  extends UndeadBrain
 
         // echo "<pre>$szRequete</pre>";
 
-        // echo "<pre>".print_r($this->aMappingChamps, true)."</pre>";
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+
         // echo "<pre>".print_r($aResultats, true)."</pre>";
 
         return $aResultats;
+    }
+
+
+    /**
+     * Connaître le nombre d'éléments.
+     * @param array $aRecherche Critères de recherche
+     * @return string           Retourne la requête
+     */
+    public function nGetNbElements($aRecherche)
+    {
+        $nRetour = 0;
+
+        $szRequete = $this->szGetSelect($aRecherche, '', true);
+
+        // echo "<pre>".$szRequete."</pre>";
+
+        $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+
+        if (isset($aResultats[0]->nNbElements) === true) {
+            $nRetour = $aResultats[0]->nNbElements;
+        }
+
+        return $nRetour;
     }
 }
