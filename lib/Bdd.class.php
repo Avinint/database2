@@ -190,7 +190,6 @@ class Bdd  extends UndeadBrain
      *
      * @return array                Liste des éléments
      */
-
     public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '')
     {
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy);
