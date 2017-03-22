@@ -193,11 +193,11 @@ class Bdd  extends UndeadBrain
      */
     public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '', $szGroupBy = '')
     {
-        $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $szGroupBy);
+        $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy);
 
-      if ($nNbElements && $nNbElements != 0) {
-          $szRequete .= " LIMIT ".$nStart.", ".$nNbElements;
-      }
+        if ($nNbElements && $nNbElements != 0) {
+            $szRequete .= " LIMIT ".$nStart.", ".$nNbElements;
+        }
 
         // echo "<pre>$szRequete</pre>";
 
