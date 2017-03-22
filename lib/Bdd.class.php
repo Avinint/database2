@@ -187,12 +187,13 @@ class Bdd  extends UndeadBrain
      * @param  integer $nStart      Numéro de début.
      * @param  integer $nNbElements Nombre de résultats.
      * @param  string  $szOrderBy   Ordre de tri.
+     * @param  string  $szGroupBy   Groupé par tel champ.
      *
      * @return array                Liste des éléments
      */
-    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '')
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '', $szGroupBy = '')
     {
-        $szRequete = $this->szGetSelect($aRecherche, $szOrderBy);
+        $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $szGroupBy);
 
       if ($nNbElements && $nNbElements != 0) {
           $szRequete .= " LIMIT ".$nStart.", ".$nNbElements;
@@ -211,13 +212,14 @@ class Bdd  extends UndeadBrain
     /**
      * Connaître le nombre d'éléments.
      * @param array $aRecherche Critères de recherche
+     * @param  string  $szGroupBy   Groupé par tel champ.
      * @return string           Retourne la requête
      */
-    public function nGetNbElements($aRecherche)
+    public function nGetNbElements($aRecherche, $szGroupBy = '')
     {
         $nRetour = 0;
 
-        $szRequete = $this->szGetSelect($aRecherche, '', true);
+        $szRequete = $this->szGetSelect($aRecherche, '', true, $szGroupBy);
 
         // echo "<pre>".$szRequete."</pre>";
 
