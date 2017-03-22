@@ -229,4 +229,69 @@ class Bdd  extends UndeadBrain
 
         return $nRetour;
     }
+
+
+    public function vAnalyseBdd($szModule = '')
+    {
+        //--------------------------------------------------------------------------------------------
+        // Analyse du fichier de conf.
+        //--------------------------------------------------------------------------------------------
+        
+        $szFichierRessource = $_SERVER['DOCUMENT_ROOT'].'/ressources/'.$szModule.'/config/bdd.yml';
+        $szFichierModule = $_SERVER['DOCUMENT_ROOT'].'/modules/'.$szModule.'/config/bdd.yml';
+        
+        $aTables = array();
+
+        if (file_exists($szFichierRessource) === true) {
+
+            $aTablesTemp = \Spyc::YAMLLoad($szFichierRessource);
+            $aTables = array_merge($aTables, $aTablesTemp);
+
+        }
+
+        if (file_exists($szFichierModule) === true) {
+
+            $aTablesTemp = \Spyc::YAMLLoad($szFichierModule);
+            $aTables = array_merge($aTables, $aTablesTemp);
+
+        }
+
+        // echo "<pre>".print_r($aTables, true)."</pre>";
+
+
+        //--------------------------------------------------------------------------------------------
+        // Récupération des infos de chaque table.
+        //--------------------------------------------------------------------------------------------
+        
+        foreach ($aTables as $szTable => $aParams) {
+
+            $szRequete = "
+                SELECT column_name AS nom_champ, column_default AS not_null, is_nullable, data_type AS type, 
+                character_maximum_length, character_set_name, column_key, extra
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE table_schema = 'easy2watch'
+                AND table_name = '".$szTable."'
+                ORDER BY ordinal_position ASC
+            ";
+
+            $aResultats = $this->aSelectBDD($szRequete);
+
+            // echo "- ".$szTable."<br/>";
+            
+            foreach ($aResultats as $nIndex => $oTable) {
+
+                // echo "<pre>".print_r($oTable, true)."</pre>";
+
+                foreach ($aTables[$szTable]['champs'] as $szChamp => $aParamsChamps) {
+                    $aParamsChamps['nom_champ'] = $szChamp;
+                    // echo "<pre>".print_r($aParamsChamps, true)."</pre>";
+
+                    
+
+                }
+                // echo "<pre>".print_r($oTable, true)."</pre>";
+            }
+
+        }
+    }
 }
