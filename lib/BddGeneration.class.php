@@ -33,10 +33,10 @@ class BddGeneration
 
         try
         {
-            $this->objConnexion = new CorePDO("mysql:host=".$GLOBALS['aParamsBdd']['hote'].";dbname=".$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
+            $this->objConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
 
             // paramètrage de l'encodage en UTF-8
-            $this->objConnexion->query("SET NAMES utf8;");
+            $this->objConnexion->query('SET NAMES utf8;');
         }
         catch( PDOException $e )
         {
@@ -64,7 +64,7 @@ class BddGeneration
             }
 
             if ($szValeur != '') {
-                $szRegle .= "'".$szCle."' : ".$szValeur;
+                $szRegle .= '\''.$szCle.'\' : '.$szValeur;
             }
 
         }
@@ -82,7 +82,7 @@ class BddGeneration
      */
     private function szFormatageNomChamp( $szChamp )
     {
-        $aChamps = explode("_", $szChamp);
+        $aChamps = explode('_', $szChamp);
         $szChamp = '';
         foreach( $aChamps as $aChamp )
         {
@@ -103,24 +103,24 @@ class BddGeneration
         $szValeurs = '';
         $szPrefixe = '';
         $nLongueur = '';
-        $aType = explode("(", $szType);
+        $aType = explode('(', $szType);
 
         if (count($aType) > 1) {
             $szType = $aType[0];
-            $nLongueur = str_replace(")", "", $aType[1]);
+            $nLongueur = str_replace(')', '', $aType[1]);
         }
 
-        if ($szType == "int" ) {
-            $szPrefixe = "n";
+        if ($szType == 'int' ) {
+            $szPrefixe = 'n';
         } else
-        if ($szType == "tinyint" ) {
-            $szPrefixe = "b";
+        if ($szType == 'tinyint' ) {
+            $szPrefixe = 'b';
         } else
-        if ($szType == "datetime" || $szType == 'date' || $szType == 'decimal' ) {
-            $szPrefixe = "sz";
+        if ($szType == 'datetime' || $szType == 'date' || $szType == 'decimal' ) {
+            $szPrefixe = 'sz';
         } else
-        if ($szType == "varchar" || $szType == "text" || $szType == "enum" ) {
-            $szPrefixe = "sz";
+        if ($szType == 'varchar' || $szType == 'text' || $szType == 'enum' ) {
+            $szPrefixe = 'sz';
             $szValeurs = str_replace(')', '', $szType);
         }
 
@@ -135,7 +135,7 @@ class BddGeneration
      */
     protected function aGetClesPrimaires()
     {
-        $szQuery = "SHOW COLUMNS FROM ".$this->szTableOriginale;
+        $szQuery = 'SHOW COLUMNS FROM '.$this->szTableOriginale;
         $rResult = $this->objConnexion->query( $szQuery );
         $aCles = array();
 
@@ -163,8 +163,8 @@ class BddGeneration
      */
     protected function aGetChamps()
     {
-        $szQuery = "SHOW FULL COLUMNS FROM ".$this->szTableOriginale;
-        // echo "<pre>$szQuery</pre>";
+        $szQuery = 'SHOW FULL COLUMNS FROM '.$this->szTableOriginale;
+        // echo '<pre>'.$szQuery.'</pre>';
         $rResult = $this->objConnexion->query( $szQuery );
         $aChamps = array();
 
@@ -192,17 +192,17 @@ class BddGeneration
                 $aChamps[$szCle]['valeurs'] = $aDetailsType[3];
             }
 
-            if (!preg_match("#[^0-9]#", $aDetailsType[2]) )
+            if (!preg_match('#[^0-9]#', $aDetailsType[2]) )
             {
                 $aChamps[$szCle]['longueur'] = $aDetailsType[2];
             }
             else
             {
-                $aChamps[$szCle]['choix'] = "array( ".str_replace(",", ", ", $aDetailsType[2])." )";
+                $aChamps[$szCle]['choix'] = 'array( '.str_replace(',', ', ', $aDetailsType[2]).' )';
             }
 
             // on regarde si le champ est requis ou non
-            if (isset($aChamps[$szCle]['Null']) && $aChamps[$szCle]['Null'] == "YES" )
+            if (isset($aChamps[$szCle]['Null']) && $aChamps[$szCle]['Null'] == 'YES' )
             {
                 $aChamps[$szCle]['requis'] = 0;
             }

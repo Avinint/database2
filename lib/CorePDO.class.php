@@ -15,7 +15,7 @@ class CorePDO extends \PDO
         // if (preg_match('/(SELECT[\s])/', $szRequete)/* && preg_match('/easynot/', $szRequete)*/) {
         //     $objUtiles = new Utiles();
         //     $szRequete = $objUtiles->szGetRequeteOptimisee($szRequete);
-        // // echo "<pre>$szRequete</pre>";
+        // // echo '<pre>'.$szRequete.'</pre>';
         // }
 
         $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
@@ -30,13 +30,13 @@ class CorePDO extends \PDO
         return parent::aSelectBDD($szRequete);
     // {
     //     $objMemCache = new \Memcache;
-    //     $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ("Could not connect");
+    //     $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
 
     //     $szCle = md5($szRequete);
 
     //     $aRetour = $objMemCache->get($szCle);
     //     if ($szContenuCache != '') {
-    //         echo "<pre>".print_r($aRetour, true)."</pre>";
+    //         echo '<pre>'.print_r($aRetour, true).'</pre>';
     //         return $aRetour;
     //     } else {
     //         $aRetour = parent::__construct($szRequete, $aMappingChamps, $szAlias);
