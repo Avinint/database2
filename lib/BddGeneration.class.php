@@ -36,7 +36,10 @@ class BddGeneration
             $this->objConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
 
             // paramètrage de l'encodage en UTF-8
-            $this->objConnexion->query('SET NAMES utf8;');
+            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+            }
+            $this->objConnexion->query('SET NAMES '.$GLOBALS['aParamsAppli']['encodage'].';');
         }
         catch( PDOException $e )
         {

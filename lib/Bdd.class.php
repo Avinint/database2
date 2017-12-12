@@ -47,7 +47,10 @@ class Bdd  extends UndeadBrain
             $this->rConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
 // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
             // paramètrage de l'encodage en UTF-8
-            $this->rConnexion->query('SET NAMES utf8;');
+            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+            }
+            $this->rConnexion->query('SET NAMES '.$GLOBALS['aParamsAppli']['encodage'].';');
 
             $GLOBALS['rConnexionBDD'] = $this->rConnexion;
             // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
