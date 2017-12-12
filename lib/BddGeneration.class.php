@@ -39,7 +39,7 @@ class BddGeneration
             if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
                 $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
             }
-            $this->objConnexion->query('SET NAMES '.$GLOBALS['aParamsAppli']['encodage'].';');
+            $this->objConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
         }
         catch( PDOException $e )
         {
