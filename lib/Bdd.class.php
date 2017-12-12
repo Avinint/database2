@@ -52,7 +52,7 @@ class Bdd  extends UndeadBrain
             }
 
             $this->rConnexion->query('SET NAMES \''.$GLOBALS['aParamsAppli']['encodage'].'\';');
-            $this->rConnexion->query('SET CHARACTER SET utf8');
+            $this->rConnexion->query('SET CHARACTER SET '.$GLOBALS['aParamsAppli']['encodage']);
 
             $GLOBALS['rConnexionBDD'] = $this->rConnexion;
             // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
