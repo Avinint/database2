@@ -50,7 +50,9 @@ class Bdd  extends UndeadBrain
             if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
                 $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
             }
-            $this->rConnexion->query('SET NAMES '.$GLOBALS['aParamsAppli']['encodage'].';');
+
+            $this->rConnexion->query('SET NAMES \''.$GLOBALS['aParamsAppli']['encodage'].'\';');
+            $this->rConnexion->query('SET CHARACTER SET utf8');
 
             $GLOBALS['rConnexionBDD'] = $this->rConnexion;
             // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
