@@ -26,8 +26,8 @@ class Bdd  extends UndeadBrain
      */
     public function __construct()
     {
-        // echo " bdd ";
-        // echo "-------- avant <pre>".print_r($this->rConnexion, true)."</pre>";
+        // echo ' bdd ';
+        // echo '-------- avant <pre>'.print_r($this->rConnexion, true).'</pre>';
         if (isset($this->rConnexion) === false) {
             $this->vConnexionBdd();
         }
@@ -41,16 +41,20 @@ class Bdd  extends UndeadBrain
      */
     public function vConnexionBdd()
     {
-        // echo "<pre>".print_r($GLOBALS['aParamsBdd'], true)."</pre>";
+        // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
         try
         {
-            $this->rConnexion = new CorePDO("mysql:host=".$GLOBALS['aParamsBdd']['hote'].";dbname=".$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
-// echo "mysql:host=".$GLOBALS['aParamsBdd']['hote'].";dbname=".$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
+            $this->rConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
+// echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
             // paramètrage de l'encodage en UTF-8
-            $this->rConnexion->query("SET NAMES utf8;");
+            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+            }
+
+            $this->rConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
 
             $GLOBALS['rConnexionBDD'] = $this->rConnexion;
-            // echo "-------- après <pre>".print_r($this->rConnexion, true)."</pre>";
+            // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
         }
         catch( PDOException $e )
         {
@@ -86,25 +90,25 @@ class Bdd  extends UndeadBrain
         if ($bNoCache === false) {
 
             $objMemCache = new \Memcache;
-            $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ("Could not connect");
+            $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
 
             $szCle = md5($szRequete);
 
             $aRetour = $objMemCache->get($szCle);
-            // echo "$szCle : <pre>".print_r($aRetour, true)."</pre>";
-            // echo "cache BDD\n";
+            // echo '$szCle : <pre>'.print_r($aRetour, true).'</pre>';
+            // echo 'cache BDD'.PHP_EOL;
             if ($aRetour != '') {
                 return $aRetour;
             }
         }
 
-        // echo "<pre>$szRequete</pre>";
+        // echo '<pre>'.$szRequete.'</pre>';
         $rLien = $this->rConnexion->query($szRequete);
 
         if ($rLien) {
             $aResult = $rLien->fetchAll(\PDO::FETCH_OBJ);
 
-            // echo "<pre>".print_r($aResult, true)."</pre>";
+            // echo '<pre>'.print_r($aResult, true).'</pre>';
 
             foreach( $aResult as $objRow )
             {
@@ -124,11 +128,11 @@ class Bdd  extends UndeadBrain
                 } else {
                     $aResultat[] = $objRow;
                 }
-            // echo "<pre>".print_r($objRow, true)."</pre>";
+            // echo '<pre>'.print_r($objRow, true).'</pre>';
             }
-            // echo "<pre>".print_r($aResultat, true)."</pre>";
+            // echo '<pre>'.print_r($aResultat, true).'</pre>';
         }
-// echo "$szCle : mise en cache\n";
+// echo $szCle.' : mise en cache'.PHP_EOL;
         if ($bNoCache === false) {
             $objMemCache->set($szCle, $aResultat, MEMCACHE_COMPRESSED, 1200);
         }
@@ -138,10 +142,10 @@ class Bdd  extends UndeadBrain
 
     public function szGetBonType($szType, $bObjet=false)
     {
-        $szType = str_replace($GLOBALS['aParamsAppli']["AppId"].'_', '', $szType);
-        if (in_array($szType, array_flip($GLOBALS['aParamsAppli']['namespaces']["data"]))) {
+        $szType = str_replace($GLOBALS['aParamsAppli']['AppId'].'_', '', $szType);
+        if (in_array($szType, array_flip($GLOBALS['aParamsAppli']['namespaces']['data']))) {
             if ($bObjet == true) {
-                $szType = "\\".$GLOBALS['aParamsAppli']['namespaces']["data"][$szType];
+                $szType = '\\'.$GLOBALS['aParamsAppli']['namespaces']['data'][$szType];
             } else {
                 $szType;
             }
@@ -171,7 +175,7 @@ class Bdd  extends UndeadBrain
             }
 
             if ($szValeur != '') {
-                $szRegle .= "'".$szCle."' : ".$szValeur;
+                $szRegle .= '\''.$szCle.'\' : '.$szValeur;
             }
 
         }
@@ -191,19 +195,19 @@ class Bdd  extends UndeadBrain
      *
      * @return array                Liste des éléments
      */
-    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = "", $szOrderBy = '', $szGroupBy = '')
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '')
     {
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy);
 
         if ($nNbElements && $nNbElements != 0) {
-            $szRequete .= " LIMIT ".$nStart.", ".$nNbElements;
+            $szRequete .= ' LIMIT '.$nStart.', '.$nNbElements;
         }
 
-        // echo "<pre>$szRequete</pre>";
+        // echo '<pre>'.$szRequete.'</pre>';
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
 
-        // echo "<pre>".print_r($aResultats, true)."</pre>";
+        // echo '<pre>'.print_r($aResultats, true).'</pre>';
 
         return $aResultats;
     }
@@ -221,7 +225,7 @@ class Bdd  extends UndeadBrain
 
         $szRequete = $this->szGetSelect($aRecherche, '', true, $szGroupBy);
 
-        // echo "<pre>".$szRequete."</pre>";
+        // echo '<pre>'.$szRequete.'</pre>';
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
 
@@ -258,7 +262,7 @@ class Bdd  extends UndeadBrain
 
         }
 
-        // echo "<pre>".print_r($aTables, true)."</pre>";
+        // echo '<pre>'.print_r($aTables, true).'</pre>';
 
 
         //--------------------------------------------------------------------------------------------
@@ -267,31 +271,31 @@ class Bdd  extends UndeadBrain
         
         foreach ($aTables as $szTable => $aParams) {
 
-            $szRequete = "
+            $szRequete = '
                 SELECT column_name AS nom_champ, column_default AS not_null, is_nullable, data_type AS type, 
                 character_maximum_length, character_set_name, column_key, extra
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE table_schema = 'easy2watch'
-                AND table_name = '".$szTable."'
+                WHERE table_schema = \'easy2watch\'
+                AND table_name = \''.$szTable.'\'
                 ORDER BY ordinal_position ASC
-            ";
+            ';
 
             $aResultats = $this->aSelectBDD($szRequete);
 
-            // echo "- ".$szTable."<br/>";
+            // echo '- '.$szTable.'<br/>';
             
             foreach ($aResultats as $nIndex => $oTable) {
 
-                // echo "<pre>".print_r($oTable, true)."</pre>";
+                // echo '<pre>'.print_r($oTable, true).'</pre>';
 
                 foreach ($aTables[$szTable]['champs'] as $szChamp => $aParamsChamps) {
                     $aParamsChamps['nom_champ'] = $szChamp;
-                    // echo "<pre>".print_r($aParamsChamps, true)."</pre>";
+                    // echo '<pre>'.print_r($aParamsChamps, true).'</pre>';
 
                     
 
                 }
-                // echo "<pre>".print_r($oTable, true)."</pre>";
+                // echo '<pre>'.print_r($oTable, true).'</pre>';
             }
 
         }

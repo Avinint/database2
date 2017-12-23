@@ -1,3 +1,4 @@
-aNamespace:
-    data:
-        Bdd:            APP\Modules\Base\Lib\Bdd
+hote:           localhost
+base:           framework
+utilisateur:    root
+mot_de_passe:   root
