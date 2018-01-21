@@ -35,25 +35,57 @@ class Bdd  extends UndeadBrain
 
 
     /**
-     * Méthode permettant de se connecter à la base de données
-     * @param string $szVersion gregor4 ou gregor3
+     * Méthode permettant de se connecter à la base de données.
+     *
+     * 
+     * 
      * @return void
      */
-    public function vConnexionBdd()
+    
+    /**
+     * Méthode permettant de se connecter à la base de données..
+     * 
+     * @param  string $sHote           Hôte hébbergeant la base de données.
+     * @param  string $sNomBase        Nom de la base de données.
+     * @param  string $sUtilisateur    Nom d'utilisateur pouvant se connecter.
+     * @param  string $sMotDePasse     Mot de passe de connexion.
+     * @param  string $sEncodage       Encodage de la base de données.
+     * @param  string $sAliasConnexion Nom de la variable globale contenant l'objet de connexion.
+     * 
+     * @return void
+     */
+    public function vConnexionBdd($sHote = '', $sNomBase = '', $sUtilisateur = '', $sMotDePasse = '', $sEncodage = '', $sAliasConnexion = 'rConnexion')
     {
+        if ($sHote == '') {
+            $sHote = $GLOBALS['aParamsBdd']['hote'];
+        }
+        if ($sNomBase == '') {
+            $sNomBase = $GLOBALS['aParamsBdd']['base'];
+        }
+        if ($sUtilisateur == '') {
+            $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
+        }
+        if ($sMotDePasse == '') {
+            $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
+        }
+        if ($sEncodage == '') {
+            $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
+        }
+
         // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
         try
         {
-            $this->rConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
+            $this->$sAliasConnexion = new CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
+            // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
 // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
             // paramètrage de l'encodage en UTF-8
             if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
                 $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
             }
 
-            $this->rConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
+            $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
 
-            $GLOBALS['rConnexionBDD'] = $this->rConnexion;
+            $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
             // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
         }
         catch( PDOException $e )
@@ -73,7 +105,7 @@ class Bdd  extends UndeadBrain
      *
      * @return array    $aResultat      Les résultats.
      */
-    public function aSelectBDD($szRequete, $aMappingChamps = array(), $bNoCache = false)
+    public function aSelectBDD($szRequete, $aMappingChamps = array(), $bNoCache = false, $sAliasConnexion = 'rConnexion')
     {
         $aResultat = array();
 
@@ -103,7 +135,7 @@ class Bdd  extends UndeadBrain
         }
 
         // echo '<pre>'.$szRequete.'</pre>';
-        $rLien = $this->rConnexion->query($szRequete);
+        $rLien = $this->$sAliasConnexion->query($szRequete);
 
         if ($rLien) {
             $aResult = $rLien->fetchAll(\PDO::FETCH_OBJ);
