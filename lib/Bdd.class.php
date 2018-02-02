@@ -56,6 +56,10 @@ class Bdd  extends UndeadBrain
      */
     public function vConnexionBdd($sHote = '', $sNomBase = '', $sUtilisateur = '', $sMotDePasse = '', $sEncodage = '', $sAliasConnexion = 'rConnexion')
     {
+        if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+            $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+        }
+
         if ($sHote == '') {
             $sHote = $GLOBALS['aParamsBdd']['hote'];
         }
@@ -69,7 +73,9 @@ class Bdd  extends UndeadBrain
             $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
         }
         if ($sEncodage == '') {
+
             $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
+            
         }
 
         // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
@@ -79,10 +85,7 @@ class Bdd  extends UndeadBrain
             // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
 // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
             // paramètrage de l'encodage en UTF-8
-            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
-                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
-            }
-
+            
             $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
 
             $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
