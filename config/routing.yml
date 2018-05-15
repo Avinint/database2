@@ -1,0 +1,7 @@
+json_details_bdd:
+    reecriture:     base/details-base-donnees.json
+    route:
+        zone:       admin
+        module:     base
+        controller: base
+        action:     details_base

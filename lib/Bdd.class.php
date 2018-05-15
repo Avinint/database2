@@ -272,6 +272,119 @@ class Bdd  extends UndeadBrain
     }
 
 
+    public function aListeTables()
+    {
+        $aTables = array();
+
+        if (isset($this->rConnexion) === false) {
+            $this->vConnexionBdd();
+        }
+
+        $sRequete = "SHOW tables FROM ".$GLOBALS['aParamsBdd']['base'];
+
+        $aResultats = $this->aSelectBDD($sRequete);
+
+        foreach ($aResultats as $nIndex => $oTable) {
+
+            $sCle = 'Tables_in_'.$GLOBALS['aParamsBdd']['base'];
+
+            $aTables[$oTable->$sCle] = array();
+
+            $sRequete = "SHOW columns FROM ".$oTable->$sCle;
+
+            $aResultats = $this->aSelectBDD($sRequete);
+
+            foreach ($aResultats as $nIndex => $oChamp) {
+
+                $aType = explode('(', $oChamp->Type);
+                $sType = array_shift($aType);
+                $sMaxLength = array_shift($aType);
+
+                $aNom = explode('_', $oChamp->Field);
+                $aNom = array_map('ucfirst', $aNom);
+                $sNom = implode('', $aNom);
+
+                $oChamp->sType = $sType;
+
+                switch ($sType) {
+                    case 'int':
+                        $oChamp->sChamp = 'n'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+                        
+                    case 'varchar':
+                        $oChamp->sChamp = 's'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+                        
+                    case 'enum':
+                        $oChamp->sChamp = 's'.$sNom;
+                        break;
+
+                    case 'datetime':
+                        $oChamp->sChamp = 'dt'.$sNom;
+                        break;
+
+                    case 'date':
+                        $oChamp->sChamp = 'd'.$sNom;
+                        break;
+
+                    case 'text':
+                        $oChamp->sChamp = 's'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+
+                    case 'tinyint':
+                        $oChamp->sChamp = 'n'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+
+                    case 'mediumtext':
+                        $oChamp->sChamp = 's'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+
+                    case 'decimal':
+                        $oChamp->sChamp = 'f'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+
+                    case 'float':
+                        $oChamp->sChamp = 'f'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+                    
+                    default:
+                        # code...
+                        break;
+                }
+
+                $aTables[$oTable->$sCle][$oChamp->Field] = $oChamp;
+            }
+
+        }
+        
+        // echo "<pre>".print_r($aTables, true)."</pre>";
+
+        return $aTables;
+
+    }
+
+
     public function vAnalyseBdd($szModule = '')
     {
         //--------------------------------------------------------------------------------------------

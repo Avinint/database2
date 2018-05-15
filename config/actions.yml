@@ -1,0 +1,9 @@
+btn_details_bdd:
+    action:
+        module:             base
+        route:              json_details_bdd
+        type:               load_data
+    callback:
+        module:             base
+        fonction:           vDynamiseDetailsBdd
+        alerte:             non
