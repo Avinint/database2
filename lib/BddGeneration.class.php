@@ -2,6 +2,7 @@
 
 namespace APP\Modules\Base\Lib;
 use APP\Modules\Base\Lib\CorePDO as CorePDO;
+use APP\Modules\Base\Lib\CorePDOSqlite as CorePDOSqlite;
 
 class BddGeneration
 {
@@ -30,16 +31,20 @@ class BddGeneration
     public function __construct()
     {
         $this->aChamps = array();
-
         try
         {
-            $this->objConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+                $this->objConnexion = new CorePDOSqlite('sqlite:'.$GLOBALS['aParamsBdd']['chemin_fichier']);
+            } else {
+                $this->objConnexion = new CorePDO('mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe']);
 
-            // paramètrage de l'encodage en UTF-8
-            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
-                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+                // paramètrage de l'encodage en UTF-8
+                if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                    $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+                }
+                $this->objConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
             }
-            $this->objConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
+            
         }
         catch( PDOException $e )
         {
