@@ -38,21 +38,21 @@ class Bdd  extends UndeadBrain
     /**
      * Méthode permettant de se connecter à la base de données.
      *
-     * 
-     * 
+     *
+     *
      * @return void
      */
-    
+
     /**
      * Méthode permettant de se connecter à la base de données..
-     * 
+     *
      * @param  string $sHote           Hôte hébbergeant la base de données.
      * @param  string $sNomBase        Nom de la base de données.
      * @param  string $sUtilisateur    Nom d'utilisateur pouvant se connecter.
      * @param  string $sMotDePasse     Mot de passe de connexion.
      * @param  string $sEncodage       Encodage de la base de données.
      * @param  string $sAliasConnexion Nom de la variable globale contenant l'objet de connexion.
-     * 
+     *
      * @return void
      */
     public function vConnexionBdd($sHote = '', $sNomBase = '', $sUtilisateur = '', $sMotDePasse = '', $sEncodage = '', $sAliasConnexion = 'rConnexion')
@@ -78,7 +78,7 @@ class Bdd  extends UndeadBrain
             if ($sEncodage == '') {
 
                 $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
-                
+
             }
         } else {
             $bSqlite = true;
@@ -86,7 +86,7 @@ class Bdd  extends UndeadBrain
                 $sHote = $GLOBALS['aParamsBdd']['chemin_fichier'];
             }
         }
-        
+
 
         // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
         try
@@ -98,10 +98,10 @@ class Bdd  extends UndeadBrain
                 // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
     // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
                 // paramètrage de l'encodage en UTF-8
-                
+
                 $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
             }
-            
+
 
             $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
             // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
@@ -328,14 +328,14 @@ class Bdd  extends UndeadBrain
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
                         }
                         break;
-                        
+
                     case 'varchar':
                         $oChamp->sChamp = 's'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
                         }
                         break;
-                        
+
                     case 'enum':
                         $oChamp->sChamp = 's'.$sNom;
                         break;
@@ -382,7 +382,7 @@ class Bdd  extends UndeadBrain
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
                         }
                         break;
-                    
+
                     default:
                         # code...
                         break;
@@ -392,7 +392,7 @@ class Bdd  extends UndeadBrain
             }
 
         }
-        
+
         // echo "<pre>".print_r($aTables, true)."</pre>";
 
         return $aTables;
@@ -405,10 +405,10 @@ class Bdd  extends UndeadBrain
         //--------------------------------------------------------------------------------------------
         // Analyse du fichier de conf.
         //--------------------------------------------------------------------------------------------
-        
+
         $szFichierRessource = $_SERVER['DOCUMENT_ROOT'].'/ressources/'.$szModule.'/config/bdd.yml';
         $szFichierModule = $_SERVER['DOCUMENT_ROOT'].'/modules/'.$szModule.'/config/bdd.yml';
-        
+
         $aTables = array();
 
         if (file_exists($szFichierRessource) === true) {
@@ -431,11 +431,11 @@ class Bdd  extends UndeadBrain
         //--------------------------------------------------------------------------------------------
         // Récupération des infos de chaque table.
         //--------------------------------------------------------------------------------------------
-        
+
         foreach ($aTables as $szTable => $aParams) {
 
             $szRequete = '
-                SELECT column_name AS nom_champ, column_default AS not_null, is_nullable, data_type AS type, 
+                SELECT column_name AS nom_champ, column_default AS not_null, is_nullable, data_type AS type,
                 character_maximum_length, character_set_name, column_key, extra
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE table_schema = \'easy2watch\'
@@ -446,7 +446,7 @@ class Bdd  extends UndeadBrain
             $aResultats = $this->aSelectBDD($szRequete);
 
             // echo '- '.$szTable.'<br/>';
-            
+
             foreach ($aResultats as $nIndex => $oTable) {
 
                 // echo '<pre>'.print_r($oTable, true).'</pre>';
@@ -455,12 +455,28 @@ class Bdd  extends UndeadBrain
                     $aParamsChamps['nom_champ'] = $szChamp;
                     // echo '<pre>'.print_r($aParamsChamps, true).'</pre>';
 
-                    
+
 
                 }
                 // echo '<pre>'.print_r($oTable, true).'</pre>';
             }
 
         }
+    }
+
+
+
+
+    public function bSetLog($sType = '', $sIdElement = '')
+    {
+        $oLog = $this->oNew('Logs');
+        $oLog->dtDate = date('Y-m-d H:i:s');
+        $oLog->sIdentifiant = $_SESSION['szIdentifiant'];
+        $oLog->sType = $sType;
+        $oLog->sIdElement = $sIdElement;
+
+        $bSucces = $oLog->bInsert();
+
+        return $bSucces;
     }
 }
