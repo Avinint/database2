@@ -468,20 +468,4 @@ class Bdd  extends UndeadBrain
 
         }
     }
-
-
-
-
-    public function bSetLog($sType = '', $sIdElement = '')
-    {
-        $oLog = $this->oNew('Logs');
-        $oLog->dtDate = date('Y-m-d H:i:s');
-        $oLog->sIdentifiant = $_SESSION['szIdentifiant'];
-        $oLog->sType = $sType;
-        $oLog->sIdElement = $sIdElement;
-
-        $bSucces = $oLog->bInsert();
-
-        return $bSucces;
-    }
 }
