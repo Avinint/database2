@@ -20,6 +20,8 @@ class Bdd  extends UndeadBrain
      */
     protected $aMappingChamps;
 
+    public $sMessagePDO;
+
     /**
      * Constructeur de la classe
      *
@@ -27,6 +29,8 @@ class Bdd  extends UndeadBrain
      */
     public function __construct()
     {
+        $this->sMessagePDO = '';
+
         // echo ' bdd ';
         // echo '-------- avant <pre>'.print_r($this->rConnexion, true).'</pre>';
         if (isset($this->rConnexion) === false) {
@@ -100,6 +104,7 @@ class Bdd  extends UndeadBrain
                 // paramètrage de l'encodage en UTF-8
 
                 $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
+                $this->$sAliasConnexion->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             }
 
 
