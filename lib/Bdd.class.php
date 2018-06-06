@@ -367,6 +367,13 @@ class Bdd  extends UndeadBrain
                         }
                         break;
 
+                    case 'smallint':
+                        $oChamp->sChamp = 'n'.$sNom;
+                        if ($sMaxLength != '') {
+                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
+                        }
+                        break;
+
                     case 'mediumtext':
                         $oChamp->sChamp = 's'.$sNom;
                         if ($sMaxLength != '') {
