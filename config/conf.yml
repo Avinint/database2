@@ -7,3 +7,4 @@ aNamespace:
     HTML: []
     data: 
       BaseAdminAction:   APP\Modules\Base\Controllers\BaseAdminAction
+      Bdd:   APP\Modules\Base\Lib\Bdd

@@ -475,4 +475,37 @@ class Bdd  extends UndeadBrain
 
         }
     }
+
+
+    /**
+     * Vérifie qu'une valeur d'un champ devant rester unique n'a pas déjà été choisie.
+     *
+     * @param  string $szTable  Table concernée.
+     * @param  string $szChamp  Champ à vérifier.
+     * @param  string $szValeur Valeur à trouver.
+     *
+     * @return boolean          Existe ou non.
+     */
+    public function bChampUniqueDejaUtilise($szTable = '', $szChamp = '', $szValeur = '')
+    {
+        $bRetour = true;
+
+        $szRequete = '
+            SELECT COUNT(*) AS nNbElements
+            FROM '.$szTable.'
+            WHERE '.$szChamp.' LIKE \''.$szValeur.'\'
+        ';
+
+        // echo "$szRequete";
+
+        $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+
+        if (isset($aResultats[0]) === true) {
+            if ($aResultats[0]->nNbElements == 0) {
+                $bRetour = false;
+            }
+        }
+
+        return $bRetour;
+    }
 }
