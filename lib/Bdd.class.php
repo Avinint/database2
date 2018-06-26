@@ -349,6 +349,10 @@ class Bdd  extends UndeadBrain
                         $oChamp->sChamp = 'dt'.$sNom;
                         break;
 
+                    case 'time':
+                        $oChamp->sChamp = 't'.$sNom;
+                        break;
+
                     case 'date':
                         $oChamp->sChamp = 'd'.$sNom;
                         break;
