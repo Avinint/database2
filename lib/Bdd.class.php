@@ -178,6 +178,13 @@ class Bdd  extends UndeadBrain
                         }
                         $objResultat->$szCleObjet = $szValeur;
                     }
+                    if ($this->aTitreLibelle) {
+                        $sTitreLibelle = "";
+                        foreach ($this->aTitreLibelle as $sNomChamp) {
+                            $sTitreLibelle .= $objRow->$sNomChamp." ";
+                        }
+                        $objResultat->sTitreLibelle = trim($sTitreLibelle);
+                    }
 
                     $aResultat[] = $objResultat;
                 } else {
