@@ -259,6 +259,14 @@ class Bdd  extends UndeadBrain
      */
     public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '')
     {
+        if (($nNbElements == 0 || $nNbElements == '') && isset($_REQUEST['nNbElementsParPage']) === true) {
+            $nNbElements = $_REQUEST['nNbElementsParPage'];
+        }
+
+        if ($nStart == '') {
+            $nStart = 0;
+        }
+
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy);
 
         if ($nNbElements && $nNbElements != 0) {
