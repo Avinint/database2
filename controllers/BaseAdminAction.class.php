@@ -31,6 +31,10 @@ class BaseAdminAction extends Bdd
             if ($szAction == 'details_base') {
                 $aRetour = $this->szDetailsBaseDonnees();
                 $szRetour = json_encode($aRetour);
+            } else if ($szAction == 'load_select') {
+
+                $aRetour = $this->aLoadSelect2JSON();
+                $szRetour = json_encode($aRetour);
             }
 
             echo $szRetour;
@@ -55,6 +59,31 @@ class BaseAdminAction extends Bdd
         // $oBdd = $this->oNew('Bdd');
         $aRetour['aElements'] = $this->aListeTables();
 
+        return $aRetour;
+    }
+
+    /**
+     * Effectue une recherche et retourne le résultat pour une select2
+     *
+     * @return array $aRetour   Retour JSON
+     */
+    protected function aLoadSelect2JSON()
+    {
+        $aRetour = array(
+
+            "aSelect2" => array()
+        );
+
+        $aRecherche = array();
+        $aChamps = $_POST['aChamps'];
+        $sTable = $_POST['sTable'];
+
+        $aRecherche['sTerm'] = $_POST['sResearch'];
+
+        $oBdd = $this->oNew('Bdd');
+        
+        $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable);
+      
         return $aRetour;
     }
 }

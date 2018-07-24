@@ -5,3 +5,11 @@ json_details_bdd:
         module:     base
         controller: base
         action:     details_base
+
+json_load_select_research:
+    reecriture: 'admin/base/base/select-research-request.json'
+    route:
+        zone: admin
+        module: base
+        controller: base
+        action: load_select

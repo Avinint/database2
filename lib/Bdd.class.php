@@ -527,4 +527,30 @@ class Bdd  extends UndeadBrain
 
         return $bRetour;
     }
+
+    /**
+     * Requête de selection pour dynamiser un select2
+     *
+     * @param array $aRecherche     Critères de recherche
+     * @param array $aChamps        Champs sur lesquelles effectuer la recherche             
+     * @param string $sTable        Table sur laquelle effectuer la recherche
+     *
+     * @return array $aResultats    Tableau de résultats
+     */
+	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '')
+	{
+		$szRequete = "
+
+			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
+			FROM ".$sTable."
+			WHERE 1=1 AND replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%'
+			ORDER BY ".$aChamps[1]." ASC
+        ";
+        
+		$aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+
+        return $aResultats;
+	}
+
+
 }
