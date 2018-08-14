@@ -181,9 +181,13 @@ class Bdd  extends UndeadBrain
                     if ($this->aTitreLibelle) {
                         $sTitreLibelle = "";
                         foreach ($this->aTitreLibelle as $sNomChamp) {
-                            $sTitreLibelle .= $objRow->$sNomChamp." ";
+                            if (isset($objRow->$sNomChamp) === true) {
+                                $sTitreLibelle .= $objRow->$sNomChamp." ";
+                            }
                         }
-                        $objResultat->sTitreLibelle = trim($sTitreLibelle);
+                        if ($sTitreLibelle != '') {
+                            $objResultat->sTitreLibelle = trim($sTitreLibelle);
+                        }
                     }
 
                     $aResultat[] = $objResultat;
