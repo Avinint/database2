@@ -21,6 +21,8 @@ class Bdd  extends UndeadBrain
     protected $aMappingChamps;
 
     public $sMessagePDO;
+    
+    public $aTitreLibelle;
 
     /**
      * Constructeur de la classe
