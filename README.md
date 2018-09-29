@@ -1,2 +1,1 @@
-- master -> version stable 1.0
-- dev -> version de dev instable en cours de dev
+# Version courante : 1.0.0
