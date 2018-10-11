@@ -1,4 +1,4 @@
-# Version courante : 1.0.0
+# Version courante : 1.0.1
 
 * **v1.0.1 : Ajout d'une méthode de formatage de fragments SQL pour les SET des UPDATE**
 Cette méthode "sFormateChampsRequeteEdition" est utilisée par les nouvelles versions des classes de data générées 
