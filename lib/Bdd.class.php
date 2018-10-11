@@ -263,7 +263,7 @@ class Bdd  extends UndeadBrain
      *
      * @return array                Liste des éléments
      */
-    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '')
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '', $szContexte = '')
     {
         if (($nNbElements == 0 || $nNbElements == '') && isset($_REQUEST['nNbElementsParPage']) === true) {
             // $nNbElements = $_REQUEST['nNbElementsParPage'];
@@ -321,7 +321,7 @@ class Bdd  extends UndeadBrain
             $this->vConnexionBdd();
         }
 
-        $sRequete = "SHOW tables FROM ".$GLOBALS['aParamsBdd']['base'];
+        $sRequete = "SHOW tables FROM `".$GLOBALS['aParamsBdd']['base']."`";
 
         $aResultats = $this->aSelectBDD($sRequete);
 
@@ -557,6 +557,29 @@ class Bdd  extends UndeadBrain
 
         return $aResultats;
 	}
+
+
+    /**
+     * Formate les champs de la requête d'insert/update
+     * afin d'en retourner une chaine pour le SET.
+     * 
+     * @param  array  $aChamps Champs concernés par l'édition.
+     * 
+     * @return string          Fragment de requête formaté.
+     */
+    protected function sFormateChampsRequeteEdition($aChamps = array())
+    {
+        $sRequete = '';
+
+        $aLignes = array();
+        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+            $aLignes[] = " ".$sUnChamp." = '".addslashes($sUneValeur)."'";
+        }
+
+        $sRequete .= implode(', ', $aLignes);
+
+        return $sRequete;
+    }
 
 
 }
