@@ -293,13 +293,14 @@ class Bdd  extends UndeadBrain
      * Connaître le nombre d'éléments.
      * @param array $aRecherche Critères de recherche
      * @param  string  $szGroupBy   Groupé par tel champ.
+     * @param  string  $szContexte   Contexte d'exécution de la requête.
      * @return string           Retourne la requête
      */
-    public function nGetNbElements($aRecherche, $szGroupBy = '')
+    public function nGetNbElements($aRecherche, $szGroupBy = '', $szContexte = '')
     {
         $nRetour = 0;
 
-        $szRequete = $this->szGetSelect($aRecherche, '', true, $szGroupBy);
+        $szRequete = $this->szGetSelect($aRecherche, '', true, '', '', $szGroupBy, $szContexte);
 
         // echo '<pre>'.$szRequete.'</pre>';
 
@@ -311,7 +312,6 @@ class Bdd  extends UndeadBrain
 
         return $nRetour;
     }
-
 
     public function aListeTables()
     {
