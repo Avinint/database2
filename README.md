@@ -1,4 +1,7 @@
-# Version courante : 1.0.2
+# Version courante : 1.0.3
+
+* **v1.0.3 : Prise en compte du contexte d'exécution de la requête lors du aGetElements**
+Prise en compte du paramètre szContexte lors de l'appel de la méthode szGetSelect dans aGetElements
 
 * **v1.0.2 : Prise en compte du contexte d'exécution de la requête lors du nGetNbElements** 
 Ajout d'un troisième paramètre sContexte dans la méthode nGetNbElements.
