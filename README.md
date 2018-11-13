@@ -1,4 +1,6 @@
-# Version courante : 1.0.1
+# Version courante : 1.0.2
+
+* **v1.0.2 : Ajout d'un paramètre bMore dans la méthode aGetSelect2JSONResearch permettant de n'afficher que les n premiers éléments**
 
 * **v1.0.1 : Ajout d'une méthode de formatage de fragments SQL pour les SET des UPDATE**
 Cette méthode "sFormateChampsRequeteEdition" est utilisée par les nouvelles versions des classes de data générées 
