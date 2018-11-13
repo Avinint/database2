@@ -1,4 +1,4 @@
-# Version courante : 1.0.3
+# Version courante : 1.0.4
 
 * **v1.0.4 : Ajout du tri (ORDER BY) dans les paramètres de la méthode qui effectue une requête pour dynamiser le select2**
 Ajout d'un paramètre sOrderBy à la méthode 'aGetSelect2JSON', pour effectuer un tri personnaliser dans la requête qui
