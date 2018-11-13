@@ -1,5 +1,10 @@
 # Version courante : 1.0.3
 
+* **v1.0.4 : Ajout du tri (ORDER BY) dans les paramètres de la méthode qui effectue une requête pour dynamiser le select2**
+Ajout d'un paramètre sOrderBy à la méthode 'aGetSelect2JSON', pour effectuer un tri personnaliser dans la requête qui
+récupére les datas en vue de la dynamisation d'un select2. Si sOrderBy n'est pas défini, c'est la valeur 'aChamps[1]' qui est 
+utilisé à la place
+
 * **v1.0.3 : Prise en compte du contexte d'exécution de la requête lors du aGetElements**
 Prise en compte du paramètre szContexte lors de l'appel de la méthode szGetSelect dans aGetElements
 

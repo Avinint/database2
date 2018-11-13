@@ -77,12 +77,13 @@ class BaseAdminAction extends Bdd
         $aRecherche = array();
         $aChamps = $_POST['aChamps'];
         $sTable = $_POST['sTable'];
+        $sOrderBy = $_POST['sOrderBy'];
 
         $aRecherche['sTerm'] = $_POST['sResearch'];
 
         $oBdd = $this->oNew('Bdd');
         
-        $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable);
+        $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable, $sOrderBy);
       
         return $aRetour;
     }
