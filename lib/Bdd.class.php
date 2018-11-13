@@ -543,14 +543,17 @@ class Bdd  extends UndeadBrain
      *
      * @return array $aResultats    Tableau de résultats
      */
-	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '')
+	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '')
 	{
-		$szRequete = "
+        if ($sOrderBy == '') {
+            $sOrderBy = $aChamps[1];
+        }
+        $szRequete = "
 
 			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
 			FROM ".$sTable."
 			WHERE 1=1 AND replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%'
-			ORDER BY ".$aChamps[1]." ASC
+			ORDER BY ".$sOrderBy." ASC
         ";
         
 		$aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
