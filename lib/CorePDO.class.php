@@ -21,6 +21,10 @@ class CorePDO extends \PDO
             return parent::query($szRequete);
         }
         catch (\PDOException $e) {
+
+            $oUtiles = new Utiles;
+            $oUtiles->vLogRequete($szRequete);
+
             switch (parent::errorCode()) {
                 case '23000':
                     $this->sMessagePDO = "Attention : cet élément est lié à un ou plusieurs autre(s). Il ne peut être supprimé.";
