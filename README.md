@@ -1,4 +1,7 @@
-# Version courante : 1.0.5
+# Version courante : 1.0.6
+
+* **v1.0.6 : Log automatique des requêtes SQL ayant échouées**
+Nécessite un coeur en v2.4.4 minimum.
 
 * **v1.0.5 : Ajout du tri (ORDER BY) dans les paramètres de la méthode qui effectue une requête pour dynamiser le select2**
 Ajout d'un paramètre sOrderBy à la méthode 'aGetSelect2JSON', pour effectuer un tri personnaliser dans la requête qui
