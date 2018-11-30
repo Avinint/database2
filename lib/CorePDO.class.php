@@ -23,7 +23,9 @@ class CorePDO extends \PDO
         catch (\PDOException $e) {
 
             $oUtiles = new Utiles;
-            $oUtiles->vLogRequete($szRequete);
+            if (method_exists($oUtiles, 'vLogRequete')) {
+                $oUtiles->vLogRequete($szRequete);
+            }
 
             switch (parent::errorCode()) {
                 case '23000':

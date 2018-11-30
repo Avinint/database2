@@ -1,4 +1,6 @@
-# Version courante : 1.0.6
+# Version courante : 1.0.7
+
+* **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe** 
 
 * **v1.0.6 : Log automatique des requêtes SQL ayant échouées**
 Nécessite un coeur en v2.4.4 minimum.
