@@ -349,6 +349,8 @@ class Bdd  extends UndeadBrain
 
                 switch ($sType) {
                     case 'int':
+                    case 'tinyint':
+                    case 'smallint':
                         $oChamp->sChamp = 'n'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
@@ -356,6 +358,9 @@ class Bdd  extends UndeadBrain
                         break;
 
                     case 'varchar':
+                    case 'text':
+                    case 'mediumtext':
+                    case 'longtext':
                         $oChamp->sChamp = 's'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
@@ -377,43 +382,10 @@ class Bdd  extends UndeadBrain
                     case 'date':
                         $oChamp->sChamp = 'd'.$sNom;
                         break;
-
-                    case 'text':
-                        $oChamp->sChamp = 's'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'tinyint':
-                        $oChamp->sChamp = 'n'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'smallint':
-                        $oChamp->sChamp = 'n'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'mediumtext':
-                        $oChamp->sChamp = 's'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
+                        
                     case 'decimal':
-                        $oChamp->sChamp = 'f'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
                     case 'float':
+                    case 'double':
                         $oChamp->sChamp = 'f'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);

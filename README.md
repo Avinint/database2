@@ -1,6 +1,10 @@
-# Version courante : 1.0.7
+# Version courante : 1.0.8
 
-* **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe** 
+* **v1.0.8 : Ajout de la prise en compte de nouveaux champs mysql pour la génération**
+- Ajout des champs double et longtext
+- Mutualisation du switch qui génère les nom de champs mappés
+
+* **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe**
 
 * **v1.0.6 : Log automatique des requêtes SQL ayant échouées**
 Nécessite un coeur en v2.4.4 minimum.
