@@ -1,4 +1,8 @@
-# Version courante : 1.0.8
+# Version courante : 1.0.9
+
+* **v1.0.9 : Prise en charge du code d'erreur de driver spécifique pour les contraintes d'unicité en plus du SQLSTATE**
+- Ajout d'un message lors d'une erreur de contrainte d'unicité et récupération du champ posant problème
+- Utilisation de errorInfo() au lieu de errorCode() pour avoir plus de détails sur l'erreur
 
 * **v1.0.8 : Ajout de la prise en compte de nouveaux champs mysql pour la génération**
 - Ajout des champs double et longtext
