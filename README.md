@@ -1,4 +1,7 @@
-# Version courante : 1.0.9
+# Version courante : 1.0.10
+
+* **v1.0.10 : Gestion du paramètre sRestriction dans Bdd->aGetSelect2JSON**
+Utilisé pour la génération de formulaire.
 
 * **v1.0.9 : Prise en charge du code d'erreur de driver spécifique pour les contraintes d'unicité en plus du SQLSTATE**
 - Ajout d'un message lors d'une erreur de contrainte d'unicité et récupération du champ posant problème

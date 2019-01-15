@@ -512,10 +512,11 @@ class Bdd  extends UndeadBrain
      * @param array $aRecherche     Critères de recherche
      * @param array $aChamps        Champs sur lesquelles effectuer la recherche             
      * @param string $sTable        Table sur laquelle effectuer la recherche
+     * @param string $sRestriction  Restriction venant compléter les critères de recherche
      *
      * @return array $aResultats    Tableau de résultats
      */
-	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '')
+	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '', $sRestriction = '')
 	{
         if ($sOrderBy == '') {
             $sOrderBy = $aChamps[1];
@@ -524,7 +525,7 @@ class Bdd  extends UndeadBrain
 
 			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
 			FROM ".$sTable."
-			WHERE 1=1 AND replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%'
+            WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%' OR valeur LIKE '%') ".$sRestriction."
 			ORDER BY ".$sOrderBy." ASC
         ";
         
