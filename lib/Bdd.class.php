@@ -525,7 +525,7 @@ class Bdd  extends UndeadBrain
 
 			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
 			FROM ".$sTable."
-            WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%' OR valeur LIKE '%') ".$sRestriction."
+            WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%') ".$sRestriction."
 			ORDER BY ".$sOrderBy." ASC
         ";
         
