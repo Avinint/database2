@@ -1,4 +1,6 @@
-# Version courante : 1.0.10
+# Version courante : 1.0.11
+
+* **v1.0.11 : EADO-373 : Utilisation d'un singleton pour la connexion BDD.**
 
 * **v1.0.10 : Gestion du paramètre sRestriction dans Bdd->aGetSelect2JSON**
 Utilisé pour la génération de formulaire.
