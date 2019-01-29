@@ -14,6 +14,8 @@ class Bdd  extends UndeadBrain
     public $rConnexion;
     public $szVersion;
 
+    private static $aConnexionStatic = array();
+
     /**
      * Tableau de correspondance des champs et de leurs alias.
      * @var array
@@ -63,61 +65,63 @@ class Bdd  extends UndeadBrain
      */
     public function vConnexionBdd($sHote = '', $sNomBase = '', $sUtilisateur = '', $sMotDePasse = '', $sEncodage = '', $sAliasConnexion = 'rConnexion')
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === false) {
-            $bSqlite = false;
-            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
-                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
-            }
+        if (isset(self::$aConnexionStatic[$sAliasConnexion]) === false) {
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === false) {
+                $bSqlite = false;
+                if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                    $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+                }
 
-            if ($sHote == '') {
-                $sHote = $GLOBALS['aParamsBdd']['hote'];
-            }
-            if ($sNomBase == '') {
-                $sNomBase = $GLOBALS['aParamsBdd']['base'];
-            }
-            if ($sUtilisateur == '') {
-                $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
-            }
-            if ($sMotDePasse == '') {
-                $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
-            }
-            if ($sEncodage == '') {
+                if ($sHote == '') {
+                    $sHote = $GLOBALS['aParamsBdd']['hote'];
+                }
+                if ($sNomBase == '') {
+                    $sNomBase = $GLOBALS['aParamsBdd']['base'];
+                }
+                if ($sUtilisateur == '') {
+                    $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
+                }
+                if ($sMotDePasse == '') {
+                    $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
+                }
+                if ($sEncodage == '') {
 
-                $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
+                    $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
 
-            }
-        } else {
-            $bSqlite = true;
-            if ($sHote == '') {
-                $sHote = $GLOBALS['aParamsBdd']['chemin_fichier'];
-            }
-        }
-
-
-        // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
-        try
-        {
-            if ($bSqlite === true) {
-                $this->$sAliasConnexion = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
+                }
             } else {
-                $this->$sAliasConnexion = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
-                // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
-    // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
-                // paramètrage de l'encodage en UTF-8
-
-                $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
-                $this->$sAliasConnexion->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $bSqlite = true;
+                if ($sHote == '') {
+                    $sHote = $GLOBALS['aParamsBdd']['chemin_fichier'];
+                }
             }
 
 
-            $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
-            // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
+            // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
+            try
+            {
+                if ($bSqlite === true) {
+                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
+                } else {
+                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
+                    // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
+        // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
+                    // paramètrage de l'encodage en UTF-8
+
+                    self::$aConnexionStatic[$sAliasConnexion]->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
+                    self::$aConnexionStatic[$sAliasConnexion]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                }
+
+                // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
+            }
+            catch( PDOException $e )
+            {
+                echo 'Unable to connect to the database : ' . $e->getMessage();
+                exit;
+            }
         }
-        catch( PDOException $e )
-        {
-            echo 'Unable to connect to the database : ' . $e->getMessage();
-            exit;
-        }
+        $this->$sAliasConnexion = self::$aConnexionStatic[$sAliasConnexion];
+        $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
     }
 
 
@@ -146,8 +150,10 @@ class Bdd  extends UndeadBrain
 
         if ($bNoCache === false) {
 
-            $objMemCache = new \Memcache;
-            $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
+            // $objMemCache = new \Memcache;
+            // $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
+            
+            $objMemCache = $this->oGetMemcache();
 
             $szCle = md5($szRequete);
 
