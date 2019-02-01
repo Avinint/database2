@@ -1,4 +1,6 @@
-# Version courante : 1.0.11
+# Version courante : 1.0.12
+
+* **v1.0.12 : PIW-156 : Prise en compte des valeurs NULL dans sFormateChampsRequeteEdition.**
 
 * **v1.0.11 : EADO-373 : Utilisation d'un singleton pour la connexion BDD.**
 

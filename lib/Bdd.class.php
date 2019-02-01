@@ -549,13 +549,18 @@ class Bdd  extends UndeadBrain
      * 
      * @return string          Fragment de requête formaté.
      */
-    protected function sFormateChampsRequeteEdition($aChamps = array())
+    protected function sFormateChampsRequeteEdition($aChamps = array(), $aChampsNull = array())
     {
         $sRequete = '';
 
         $aLignes = array();
         foreach ($aChamps as $sUnChamp => $sUneValeur) {
             $aLignes[] = " ".$sUnChamp." = '".addslashes($sUneValeur)."'";
+        }
+        if ($aChampsNull) {
+            foreach ($aChampsNull as $sUnChamp) {
+                $aLignes[] = " ".$sUnChamp." = NULL";
+            }
         }
 
         $sRequete .= implode(', ', $aLignes);
