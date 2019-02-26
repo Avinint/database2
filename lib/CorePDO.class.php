@@ -24,7 +24,7 @@ class CorePDO extends \PDO
 
             $oUtiles = new Utiles;
             if (method_exists($oUtiles, 'vLogRequete')) {
-                $oUtiles->vLogRequete($szRequete);
+                $oUtiles->vLogRequete($szRequete, true);
             }
 
             switch (parent::errorCode()) {
