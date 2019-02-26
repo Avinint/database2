@@ -78,6 +78,7 @@ class BaseAdminAction extends Bdd
         $aChamps = $_POST['aChamps'];
         $sTable = $_POST['sTable'];
         $sOrderBy = $_POST['sOrderBy'];
+        $sRestriction = $_POST['sRestriction'];
 
         $aRecherche['sTerm'] = $_POST['sResearch'];
 
@@ -94,7 +95,7 @@ class BaseAdminAction extends Bdd
             $aRetour['aSelect2'] = $aElements;
         }
 
-        $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable, $sOrderBy);
+        $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable, $sOrderBy, $sRestriction);
       
         return $aRetour;
     }

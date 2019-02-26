@@ -14,6 +14,8 @@ class Bdd  extends UndeadBrain
     public $rConnexion;
     public $szVersion;
 
+    private static $aConnexionStatic = array();
+
     /**
      * Tableau de correspondance des champs et de leurs alias.
      * @var array
@@ -63,61 +65,63 @@ class Bdd  extends UndeadBrain
      */
     public function vConnexionBdd($sHote = '', $sNomBase = '', $sUtilisateur = '', $sMotDePasse = '', $sEncodage = '', $sAliasConnexion = 'rConnexion')
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === false) {
-            $bSqlite = false;
-            if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
-                $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
-            }
+        if (isset(self::$aConnexionStatic[$sAliasConnexion]) === false) {
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === false) {
+                $bSqlite = false;
+                if (isset($GLOBALS['aParamsAppli']['encodage']) === false) {
+                    $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
+                }
 
-            if ($sHote == '') {
-                $sHote = $GLOBALS['aParamsBdd']['hote'];
-            }
-            if ($sNomBase == '') {
-                $sNomBase = $GLOBALS['aParamsBdd']['base'];
-            }
-            if ($sUtilisateur == '') {
-                $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
-            }
-            if ($sMotDePasse == '') {
-                $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
-            }
-            if ($sEncodage == '') {
+                if ($sHote == '') {
+                    $sHote = $GLOBALS['aParamsBdd']['hote'];
+                }
+                if ($sNomBase == '') {
+                    $sNomBase = $GLOBALS['aParamsBdd']['base'];
+                }
+                if ($sUtilisateur == '') {
+                    $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
+                }
+                if ($sMotDePasse == '') {
+                    $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
+                }
+                if ($sEncodage == '') {
 
-                $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
+                    $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
 
-            }
-        } else {
-            $bSqlite = true;
-            if ($sHote == '') {
-                $sHote = $GLOBALS['aParamsBdd']['chemin_fichier'];
-            }
-        }
-
-
-        // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
-        try
-        {
-            if ($bSqlite === true) {
-                $this->$sAliasConnexion = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
+                }
             } else {
-                $this->$sAliasConnexion = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
-                // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
-    // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
-                // paramètrage de l'encodage en UTF-8
-
-                $this->$sAliasConnexion->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
-                $this->$sAliasConnexion->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $bSqlite = true;
+                if ($sHote == '') {
+                    $sHote = $GLOBALS['aParamsBdd']['chemin_fichier'];
+                }
             }
 
 
-            $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
-            // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
+            // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
+            try
+            {
+                if ($bSqlite === true) {
+                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
+                } else {
+                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
+                    // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
+        // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
+                    // paramètrage de l'encodage en UTF-8
+
+                    self::$aConnexionStatic[$sAliasConnexion]->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
+                    self::$aConnexionStatic[$sAliasConnexion]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                }
+
+                // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
+            }
+            catch( PDOException $e )
+            {
+                echo 'Unable to connect to the database : ' . $e->getMessage();
+                exit;
+            }
         }
-        catch( PDOException $e )
-        {
-            echo 'Unable to connect to the database : ' . $e->getMessage();
-            exit;
-        }
+        $this->$sAliasConnexion = self::$aConnexionStatic[$sAliasConnexion];
+        $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
     }
 
 
@@ -146,8 +150,10 @@ class Bdd  extends UndeadBrain
 
         if ($bNoCache === false) {
 
-            $objMemCache = new \Memcache;
-            $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
+            // $objMemCache = new \Memcache;
+            // $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
+            
+            $objMemCache = $this->oGetMemcache();
 
             $szCle = md5($szRequete);
 
@@ -349,6 +355,8 @@ class Bdd  extends UndeadBrain
 
                 switch ($sType) {
                     case 'int':
+                    case 'tinyint':
+                    case 'smallint':
                         $oChamp->sChamp = 'n'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
@@ -356,6 +364,9 @@ class Bdd  extends UndeadBrain
                         break;
 
                     case 'varchar':
+                    case 'text':
+                    case 'mediumtext':
+                    case 'longtext':
                         $oChamp->sChamp = 's'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
@@ -377,43 +388,10 @@ class Bdd  extends UndeadBrain
                     case 'date':
                         $oChamp->sChamp = 'd'.$sNom;
                         break;
-
-                    case 'text':
-                        $oChamp->sChamp = 's'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'tinyint':
-                        $oChamp->sChamp = 'n'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'smallint':
-                        $oChamp->sChamp = 'n'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'mediumtext':
-                        $oChamp->sChamp = 's'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
+                        
                     case 'decimal':
-                        $oChamp->sChamp = 'f'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
                     case 'float':
+                    case 'double':
                         $oChamp->sChamp = 'f'.$sNom;
                         if ($sMaxLength != '') {
                             $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
@@ -540,10 +518,11 @@ class Bdd  extends UndeadBrain
      * @param array $aRecherche     Critères de recherche
      * @param array $aChamps        Champs sur lesquelles effectuer la recherche             
      * @param string $sTable        Table sur laquelle effectuer la recherche
+     * @param string $sRestriction  Restriction venant compléter les critères de recherche
      *
      * @return array $aResultats    Tableau de résultats
      */
-	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '')
+	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '', $sRestriction = '')
 	{
         if ($sOrderBy == '') {
             $sOrderBy = $aChamps[1];
@@ -552,7 +531,7 @@ class Bdd  extends UndeadBrain
 
 			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
 			FROM ".$sTable."
-			WHERE 1=1 AND replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%'
+            WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . $aRecherche['sTerm'] . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . $aRecherche['sTerm'] . "%') ".$sRestriction."
 			ORDER BY ".$sOrderBy." ASC
         ";
         
@@ -570,13 +549,18 @@ class Bdd  extends UndeadBrain
      * 
      * @return string          Fragment de requête formaté.
      */
-    protected function sFormateChampsRequeteEdition($aChamps = array())
+    protected function sFormateChampsRequeteEdition($aChamps = array(), $aChampsNull = array())
     {
         $sRequete = '';
 
         $aLignes = array();
         foreach ($aChamps as $sUnChamp => $sUneValeur) {
             $aLignes[] = " ".$sUnChamp." = '".addslashes($sUneValeur)."'";
+        }
+        if ($aChampsNull) {
+            foreach ($aChampsNull as $sUnChamp) {
+                $aLignes[] = " ".$sUnChamp." = NULL";
+            }
         }
 
         $sRequete .= implode(', ', $aLignes);

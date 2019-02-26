@@ -2,7 +2,22 @@
 
 * **v1.0.13 : Ajout du paramètre dans l'appel au vLogRequete afin de loguer dans le fichier de log d'Apache** 
 
-* **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe** 
+* **v1.0.12 : PIW-156 : Prise en compte des valeurs NULL dans sFormateChampsRequeteEdition.**
+
+* **v1.0.11 : EADO-373 : Utilisation d'un singleton pour la connexion BDD.**
+
+* **v1.0.10 : Gestion du paramètre sRestriction dans Bdd->aGetSelect2JSON**
+Utilisé pour la génération de formulaire.
+
+* **v1.0.9 : Prise en charge du code d'erreur de driver spécifique pour les contraintes d'unicité en plus du SQLSTATE**
+- Ajout d'un message lors d'une erreur de contrainte d'unicité et récupération du champ posant problème
+- Utilisation de errorInfo() au lieu de errorCode() pour avoir plus de détails sur l'erreur
+
+* **v1.0.8 : Ajout de la prise en compte de nouveaux champs mysql pour la génération**
+- Ajout des champs double et longtext
+- Mutualisation du switch qui génère les nom de champs mappés
+
+* **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe**
 
 * **v1.0.6 : Log automatique des requêtes SQL ayant échouées**
 Nécessite un coeur en v2.4.4 minimum.
