@@ -1,6 +1,6 @@
-# Version courante : 1.0.8
+# Version courante : 1.0.13
 
-* **v1.0.8 : Ajout du paramètre dans l'appel au vLogRequete afin de loguer dans le fichier de log d'Apache** 
+* **v1.0.13 : Ajout du paramètre dans l'appel au vLogRequete afin de loguer dans le fichier de log d'Apache** 
 
 * **v1.0.7 : Exécution du vLogRequete uniquement si la méthode existe** 
 
