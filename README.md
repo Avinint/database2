@@ -1,4 +1,6 @@
-# Version courante : 1.0.13
+# Version courante : 1.0.14
+
+* **v1.0.14 : aGetSelect2JSON correctif pour faire des recherches avec apostrophe mon cher Bernard Pivot** 
 
 * **v1.0.13 : Ajout du paramètre dans l'appel au vLogRequete afin de loguer dans le fichier de log d'Apache** 
 
