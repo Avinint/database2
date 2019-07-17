@@ -33,13 +33,6 @@ class Bdd  extends UndeadBrain
     public $sNomTable;
 
     /**
-     * Nom du champ désigné en tant que clé primaire dans la bdd (Nécessaire pour les fonctions bUpdate et bDelete)
-     * @var string 
-     * 
-    */
-    public $sNomChampIdBdd;
-
-    /**
      * Constructeur de la classe
      *
      * @return void
@@ -755,16 +748,16 @@ class Bdd  extends UndeadBrain
             throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
         }
 
-        if(empty($this->sNomChampIdBdd) === true)
+        if(empty($this->sNomCle) === true)
         {
-            throw new \Exception("sNomChampIdBdd n'a pas été défini pour le modèle " . get_called_class());
+            throw new \Exception("sNomCle n'a pas été défini pour le modèle " . get_called_class());
         }
 
         $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($aChamps, $aChampsNull);
 
 
         $sRequete = "UPDATE {$this->sNomTable} SET " . $aPreparationRequete['sRequete']
-                  . " WHERE {$this->sNomChampIdBdd} = :nIdElement";
+                  . " WHERE {$this->sNomCle} = :nIdElement";
         
         
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
@@ -796,9 +789,9 @@ class Bdd  extends UndeadBrain
             throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
         }
 
-        if(empty($this->sNomChampIdBdd) === true)
+        if(empty($this->sNomCle) === true)
         {
-            throw new \Exception("sNomChampId n'a pas été défini pour le modèle " . get_called_class());
+            throw new \Exception("sNomCle n'a pas été défini pour le modèle " . get_called_class());
         }
 
         //Ici pas besoin de générer les champs préparé, on possède uniquement le champ nIdElement
@@ -809,7 +802,7 @@ class Bdd  extends UndeadBrain
             ':nIdElement' => $this->$sNomChampId
         );
 
-        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomChampIdBdd} = :nIdElement";
+        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomCle} = :nIdElement";
 
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
 
@@ -817,17 +810,17 @@ class Bdd  extends UndeadBrain
     }
 
     /**
-     * Renvoie le champ mappé sur sNomChampIdBdd
+     * Renvoie le champ mappé sur sNomCle
      * 
      * @return string Nom du champ mappé (Ex : nIdTrucMuche)
      */
     private function sGetNomChampId(){
-        if(empty($this->aMappingChamps[$this->sNomChampIdBdd]) === false)
+        if(empty($this->aMappingChamps[$this->sNomCle]) === false)
         {
-            return $this->aMappingChamps[$this->sNomChampIdBdd];
+            return $this->aMappingChamps[$this->sNomCle];
         }
 
-        throw new \Exception("Mapping de la clé primaire {$this->sNomChampIdBdd} non défini dans le tableau aMappingChamps");
+        throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
     }
 
 }

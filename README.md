@@ -1,4 +1,6 @@
-# Version courante : 1.0.15
+# Version courante : 1.0.16
+
+* **v1.0.16 : Utilisation de la propriété sNomCle déjà existante pour obtenir le nom du champ clé primaire au lieu de sNomChampIdBdd**
 
 * **v1.0.15 : Gestion des requêtes préparées et centralisation de bInsert, bUpdate et bDelete dans Bdd.class.php**
 - Intérêts des requêtes préparées : Gain de sécurité en se prémunissant des injections SQL et gain de temps d'exécution en ne préparant pas n fois la requête à chaque exécution.
