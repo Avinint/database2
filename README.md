@@ -1,4 +1,12 @@
-# Version courante : 1.0.14
+# Version courante : 1.0.15
+
+* **v1.0.15 : Gestion des requêtes préparées et centralisation de bInsert, bUpdate et bDelete dans Bdd.class.php**
+- Intérêts des requêtes préparées : Gain de sécurité en se prémunissant des injections SQL et gain de temps d'exécution en ne préparant pas n fois la requête à chaque exécution.
+- Raison de la centralisation des méthodes précisé dans le titre : Ces méthodes sont automatiquement créées par le générateur mais celle-ci sont la plupart du temps similaires
+et la seule partie qui change dans celle-ci est le nom de la table. Les placer directement dans Bdd.class.php permet de gagner en propreté de code et par extension d'utiliser 
+les requêtes préparées citées au dessus systématiquement. Il est toujours possible de les surcharger.
+
+Pour utiliser ces méthodes il est cependant nécessaire de définir deux propriétés de classe dans le constructeur de vos modèles : sNomTable et sNomChampIdBdd
 
 * **v1.0.14 : aGetSelect2JSON correctif pour faire des recherches avec apostrophe mon cher Bernard Pivot** 
 

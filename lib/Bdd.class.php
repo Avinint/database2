@@ -26,6 +26,19 @@ class Bdd  extends UndeadBrain
     
     public $aTitreLibelle;
 
+    /** 
+     * Nom de la table (Utilisé dans bInsert, bUpdate et bDelete)
+     * @var string
+     */
+    public $sNomTable;
+
+    /**
+     * Nom du champ désigné en tant que clé primaire dans la bdd (Nécessaire pour les fonctions bUpdate et bDelete)
+     * @var string 
+     * 
+    */
+    public $sNomChampIdBdd;
+
     /**
      * Constructeur de la classe
      *
@@ -40,6 +53,9 @@ class Bdd  extends UndeadBrain
         if (isset($this->rConnexion) === false) {
             $this->vConnexionBdd();
         }
+
+        $this->sNomTable = "";
+        $this->sNomChampIdBdd = "";
     }
 
 
@@ -100,12 +116,15 @@ class Bdd  extends UndeadBrain
             // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
             try
             {
-                if ($bSqlite === true) {
+                if ($bSqlite === true)
+                {
                     self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
-                } else {
+                } 
+                else
+                {
                     self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
                     // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
-        // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
+                    // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
                     // paramètrage de l'encodage en UTF-8
 
                     self::$aConnexionStatic[$sAliasConnexion]->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
@@ -567,5 +586,248 @@ class Bdd  extends UndeadBrain
         return $sRequete;
     }
 
+
+    /**
+     * Prépare les champs et la requête placeholder pour une requête
+     * préparé
+     * 
+     * @param array $aChamps Champs avec des valeurs non nulles 
+     * @param array $aChampsNull Champs avec des valeurs nulles
+     * 
+     * @return array[]
+     * @return array['aChampsPrepares'] string[] Les champs préparés
+     * @return array['sRequete'] string La partie de la requête avec les placeholders (SET machin = :valeur_machin)
+     */
+    protected function aPreparerChampsPlaceHolderRequete($aChamps = array(), $aChampsNull= array())
+    {
+        $aRetour = array(
+            'sRequete' => '',
+            'aChampsPrepare' => array()
+        );
+
+        $aLignes = array();
+        /**
+         * Dans le parcours des champs on prépare
+         * les lignes dans la requête SQL contenant 
+         * les placeholders (:nomchamp) et on prépare en
+         * même temps les valeurs de ces placeholders
+         * qui seront attribué dans le aPreparerRequete
+         */
+        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
+            $aRetour['aChampsPrepare'][":{$sUnChamp}"] = $sUneValeur;
+        }        
+
+
+        if ($aChampsNull) {
+            foreach ($aChampsNull as $sUnChamp) {
+                $aLignes[] = "{$sUnChamp} = NULL";
+            }
+        }
+
+        $aRetour['sRequete'] .= implode(', ', $aLignes);
+
+        return $aRetour;
+    }
+
+    /**
+     * Crée la partie de la requête contenant les placeholders (:nomchamp)
+     * 
+     * @param string[] $aChamps 
+     * 
+     * @return string
+     */
+    protected function sPreparerRequetePlaceHolder($aChamps = array(), $aChampsNull= array())
+    {
+        $sRequete = '';
+        $aLignes = array();
+        
+        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
+        }      
+
+        if (is_array($aChampsNull)) {
+            foreach ($aChampsNull as $sUnChamp) {
+                $aLignes[] = "{$sUnChamp} = NULL";
+            }
+        }
+
+        return implode(', ', $aLignes);
+    }
+
+    /**
+     * Prépare les champs pour la requête contenant les placeholders
+     * 
+     * (Attention : il faut que les indexs dans le tableau $aChamps correspondent aux placeholders
+     * dans la requête, veillez donc à utiliser le même tableau de champs dans les deux méthodes
+     * si vous n'utilisez pas la fonction aPreparerChampsPlaceHolderRequete)
+     * 
+     * @param string[] $aChamps Les champs à préparer : L'index utilisé dans le nouveau tableau sera égale à ":nomdudchamp"
+     * 
+     * @return string[] Les champs préparés
+     */
+    protected function aPreparerChampsRequete($aChamps= array())
+    {
+        $sRequete = '';
+        $aChampsPrepare = array();
+        
+        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+            $aChampsPrepare[":{$sUnChamp}"] = $sUneValeur;
+        }
+
+        return $aChampsPrepare;
+    }
+
+    /**
+     * Prépare la requête avec les placeholders et renvoi un objet PDOStatement
+     * 
+     * @param string $sRequete La première partie de la requête (ex : 'INSERT INTO table SET ')
+     * 
+     * @return \PDOStatement L'objet de PDO pour les requêtes préparées
+     */
+    protected function oPreparerRequete($sRequete)
+    {
+        return $this->rConnexion->prepare($sRequete);
+    }
+
+    /**
+     * Execute la requête par l'objet \PDOStatement
+     * 
+     * C'est cette fonction qu'il faut utiliser si vous souhaitez
+     * exécuter la même requête préparé avec des paramètres différents
+     * 
+     * @param \PDOStatement $oRequetePrepare La requête préparé préalablement
+     * @param string[] $aChampsPrepare Les champs préparé à utilisé dans la requête
+     * 
+     * @return bool Vrai en cas de succès, faux sinon
+     */
+    protected function bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare = array())
+    {
+        return $oRequetePrepare->execute($aChampsPrepare);
+    }
+
+    /**
+     * Pour utiliser les méthodes qui vont suivre 
+     * vous devez définir deux propriétés dans le modèle correspondant
+     * 
+     * sNomTable : Nom de la table
+     * sNomChampIdBdd : Nom du champ en base de données désigné en tant que clé primaire
+     * 
+     * Vous devez également indiqué son mapping dans le tableau aMappingChamps (Normalement cela est fait automatiquement par le générateur)
+     */
+
+    /**
+     * Insertion d'un élément dans la bdd
+     * 
+     * @param string[] $aChamps Liste des champs non nuls
+     * @param string[] $aChampsNull Liste des champs nuls
+     * 
+     * @return bool Vrai si la requête a fonctionné, faux sinon
+     */
+    protected function bInsert($aChamps = array(), $aChampsNull = array()){
+
+        if(empty($this->sNomTable) === true)
+        {
+            throw new \Exception("sNomTable n'a pas été défini pour ce modèle");
+        }
+
+        $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($aChamps, $aChampsNull);
+
+        $sRequete = "INSERT INTO {$this->sNomTable} SET " . $aPreparationRequete['sRequete'];
+        
+        $oRequetePrepare = $this->oPreparerRequete($sRequete);
+
+        return $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+    }
+
+    /**
+     * Modification d'un élément dans la bdd
+     * 
+     * @param string[] $aChamps Liste des champs non nuls
+     * @param string[] $aChampsNull Liste des champs nuls
+     * 
+     * @return bool Vrai si la requête a fonctionné, faux sinon
+     */
+    protected function bUpdate($aChamps = array(), $aChampsNull = array())
+    {
+        if(empty($this->sNomTable) === true)
+        {
+            throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
+        }
+
+        if(empty($this->sNomChampIdBdd) === true)
+        {
+            throw new \Exception("sNomChampIdBdd n'a pas été défini pour le modèle " . get_called_class());
+        }
+
+        $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($aChamps, $aChampsNull);
+
+
+        $sRequete = "UPDATE {$this->sNomTable} SET " . $aPreparationRequete['sRequete']
+                  . " WHERE {$this->sNomChampIdBdd} = :nIdElement";
+        
+        
+        $oRequetePrepare = $this->oPreparerRequete($sRequete);
+
+        //On récupère le nom du champ contenant la clé primaire par le mapping champs
+        $sNomChampId = $this->sGetNomChampId();
+
+        //On rajoute l'id élement dans les valeurs préparé pour qu'elle remplace le placeholder
+        $aPreparationRequete['aChampsPrepare'][':nIdElement'] = $this->$sNomChampId;
+
+        return $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+    }
+
+    /**
+     * Suppression d'un élément par son id
+     * 
+     * Pour utiliser cette fonction la proprité
+     * sNomChampId doit être défini en plus
+     * du nom de la table
+     * 
+     * @param int La clé primaire de l'élément
+     * 
+     * @return bool Vrai en cas de succès, faux sinon
+     */
+    protected function bDelete($nIdElement = 0)
+    {
+        if(empty($this->sNomTable) === true)
+        {
+            throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
+        }
+
+        if(empty($this->sNomChampIdBdd) === true)
+        {
+            throw new \Exception("sNomChampId n'a pas été défini pour le modèle " . get_called_class());
+        }
+
+        //Ici pas besoin de générer les champs préparé, on possède uniquement le champ nIdElement
+        //On récupère le nom du champ contenant la clé primaire par le mapping champs
+        $sNomChampId = $this->sGetNomChampId();
+
+        $aChampsPrepare = array(
+            ':nIdElement' => $this->$sNomChampId
+        );
+
+        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomChampIdBdd} = :nIdElement";
+
+        $oRequetePrepare = $this->oPreparerRequete($sRequete);
+
+        return $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
+    }
+
+    /**
+     * Renvoie le champ mappé sur sNomChampIdBdd
+     * 
+     * @return string Nom du champ mappé (Ex : nIdTrucMuche)
+     */
+    private function sGetNomChampId(){
+        if(empty($this->aMappingChamps[$this->sNomChampIdBdd]) === false)
+        {
+            return $this->aMappingChamps[$this->sNomChampIdBdd];
+        }
+
+        throw new \Exception("Mapping de la clé primaire {$this->sNomChampIdBdd} non défini dans le tableau aMappingChamps");
+    }
 
 }
