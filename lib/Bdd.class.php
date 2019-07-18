@@ -696,7 +696,16 @@ class Bdd  extends UndeadBrain
      */
     protected function bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare = array())
     {
-        return $oRequetePrepare->execute($aChampsPrepare);
+        try
+        {
+            return $oRequetePrepare->execute($aChampsPrepare);
+        }
+        catch(\PDOException $e)
+        {
+            $this->sMessagePDO = $e->getMessage();
+            return false;
+        }
+        
     }
 
     /**
@@ -717,7 +726,9 @@ class Bdd  extends UndeadBrain
      * 
      * @return bool Vrai si la requête a fonctionné, faux sinon
      */
-    protected function bInsert($aChamps = array(), $aChampsNull = array()){
+    protected function bInsert($aChamps = array(), $aChampsNull = array())
+    {
+        $bRetour = false;
 
         if(empty($this->sNomTable) === true)
         {
@@ -730,7 +741,15 @@ class Bdd  extends UndeadBrain
         
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
 
-        return $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+        
+        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+
+        if($bRetour === false)
+        {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+
+        return $bRetour;
     }
 
     /**
@@ -768,7 +787,14 @@ class Bdd  extends UndeadBrain
         //On rajoute l'id élement dans les valeurs préparé pour qu'elle remplace le placeholder
         $aPreparationRequete['aChampsPrepare'][':nIdElement'] = $this->$sNomChampId;
 
-        return $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+
+        if($bRetour === false)
+        {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+
+        return $bRetour;
     }
 
     /**
@@ -806,7 +832,14 @@ class Bdd  extends UndeadBrain
 
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
 
-        return $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
+        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
+
+        if($bRetour === false)
+        {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+
+        return $bRetour;
     }
 
     /**

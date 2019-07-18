@@ -1,4 +1,6 @@
-# Version courante : 1.0.16
+# Version courante : 1.0.17
+
+* **v1.0.17 : Surcharge de prepare() dans CodePDO.class.php pour gérer correctement les erreurs et les placer dans sMessagePDO**
 
 * **v1.0.16 : Utilisation de la propriété sNomCle déjà existante pour obtenir le nom du champ clé primaire au lieu de sNomChampIdBdd**
 
