@@ -726,7 +726,7 @@ class Bdd  extends UndeadBrain
      * 
      * @return bool Vrai si la requête a fonctionné, faux sinon
      */
-    protected function bInsert($aChamps = array(), $aChampsNull = array())
+    public function bInsert($aChamps = array(), $aChampsNull = array())
     {
         $bRetour = false;
 
@@ -748,6 +748,12 @@ class Bdd  extends UndeadBrain
         {
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
         }
+        else
+        {
+            $sNomChampId = $this->sGetNomChampId();
+            $this->$sNomChampId = $this->rConnexion->lastInsertId();
+            $this->bSetLog("insert_{$this->sNomTable}", $this->$sNomChampId);
+        }
 
         return $bRetour;
     }
@@ -760,7 +766,7 @@ class Bdd  extends UndeadBrain
      * 
      * @return bool Vrai si la requête a fonctionné, faux sinon
      */
-    protected function bUpdate($aChamps = array(), $aChampsNull = array())
+    public function bUpdate($aChamps = array(), $aChampsNull = array())
     {
         if(empty($this->sNomTable) === true)
         {
@@ -793,6 +799,10 @@ class Bdd  extends UndeadBrain
         {
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
         }
+        else
+        {
+            $this->bSetLog("update_{$this->sNomTable}", $this->$sNomChampId);
+        }
 
         return $bRetour;
     }
@@ -808,7 +818,7 @@ class Bdd  extends UndeadBrain
      * 
      * @return bool Vrai en cas de succès, faux sinon
      */
-    protected function bDelete($nIdElement = 0)
+    public function bDelete($nIdElement = 0)
     {
         if(empty($this->sNomTable) === true)
         {
@@ -837,6 +847,10 @@ class Bdd  extends UndeadBrain
         if($bRetour === false)
         {
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+        else
+        {
+            $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
         }
 
         return $bRetour;

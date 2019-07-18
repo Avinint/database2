@@ -1,4 +1,6 @@
-# Version courante : 1.0.17
+# Version courante : 1.0.18
+
+* **v1.0.18 : Correction visibilité méthodes bInsert, bUpdate et bDelete et rajout de bSetLog si réussite requêtes**
 
 * **v1.0.17 : Surcharge de prepare() dans CodePDO.class.php pour gérer correctement les erreurs et les placer dans sMessagePDO**
 
