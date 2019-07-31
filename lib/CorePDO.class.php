@@ -35,7 +35,7 @@ class CorePDO extends \PDO
              * @var array $infosErreur
              */
             $this->sMessagePDO = $this->sGetMessagePDO($e);
-            return false;
+            throw $e;
         }
     }
 
