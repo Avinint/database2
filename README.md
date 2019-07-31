@@ -1,4 +1,6 @@
-# Version courante : 1.0.18
+# Version courante : 1.0.19
+
+* **v1.0.19 : Ajout d'un throw de l'exception PDO après qu'elle a été attrapée (et que la requête a été logguée) pour pouvoir l'attraper dans la fonction appelante.**
 
 * **v1.0.18 : Correction visibilité méthodes bInsert, bUpdate et bDelete et rajout de bSetLog si réussite requêtes**
 
