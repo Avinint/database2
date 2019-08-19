@@ -71,7 +71,7 @@ class CorePDO extends \PDO
      * 
      * @return \PDOStatement Objet requête préparé PDO
      */
-    public function prepare($szRequete = '')
+    public function prepare($szRequete = '', $aOptionsDriver = NULL)
     {
         try
         {

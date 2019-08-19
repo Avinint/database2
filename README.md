@@ -1,4 +1,6 @@
-# Version courante : 1.0.19
+# Version courante : 1.0.20
+
+* **v1.0.20 : Ajout paramètre aOptionsDriver pour prepare dans CorePDO pour correspondre avec la méthode parente et suppression paramètre inutilisé dans bDelete de Bdd**
 
 * **v1.0.19 : Ajout d'un throw de l'exception PDO après qu'elle a été attrapée (et que la requête a été logguée) pour pouvoir l'attraper dans la fonction appelante.**
 

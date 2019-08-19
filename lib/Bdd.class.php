@@ -818,7 +818,7 @@ class Bdd  extends UndeadBrain
      * 
      * @return bool Vrai en cas de succès, faux sinon
      */
-    public function bDelete($nIdElement = 0)
+    public function bDelete()
     {
         if(empty($this->sNomTable) === true)
         {
