@@ -1,4 +1,6 @@
-# Version courante : 1.0.20
+# Version courante : 1.0.21
+
+* **v1.0.21 : suppression d'un warning sur aSelectBDD**
 
 * **v1.0.20 : Ajout paramètre aOptionsDriver pour prepare dans CorePDO pour correspondre avec la méthode parente et suppression paramètre inutilisé dans bDelete de Bdd**
 

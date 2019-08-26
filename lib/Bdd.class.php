@@ -187,7 +187,7 @@ class Bdd  extends UndeadBrain
 
             foreach( $aResult as $objRow )
             {
-                if (count($aMappingChamps)) {
+                if (is_array($aMappingChamps) && count($aMappingChamps)) {
                     $objResultat = new \StdClass();
 
                     foreach ($objRow as $szCleLigne => $szValeur) {
