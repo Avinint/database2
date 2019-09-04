@@ -16,12 +16,11 @@ class CorePDO extends \PDO
     public function query($szRequete = '')
     {
         $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
-
+        $mResultat = null;
         try {
-            return parent::query($szRequete);
+            $mResultat = parent::query($szRequete);
         }
         catch (\PDOException $e) {
-
             $oUtiles = new Utiles;
             if (method_exists($oUtiles, 'vLogRequete')) {
                 $oUtiles->vLogRequete($szRequete, true);
@@ -36,6 +35,8 @@ class CorePDO extends \PDO
              */
             $this->sMessagePDO = $this->sGetMessagePDO($e);
             throw $e;
+        } finally {
+            return $mResultat;
         }
     }
 
