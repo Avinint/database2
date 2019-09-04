@@ -1,6 +1,9 @@
-# Version courante : 1.0.21
+# Version courante : 1.0.22
 
-* **v1.0.21 : correctif sur try/catch de query afin de ne pas générer l'erreur PHP**
+* **v1.0.22 : correctif sur try/catch de query afin de ne pas générer l'erreur PHP**
+
+* **v1.0.21 : suppression d'un warning sur aSelectBDD**
+
 
 * **v1.0.20 : Ajout paramètre aOptionsDriver pour prepare dans CorePDO pour correspondre avec la méthode parente et suppression paramètre inutilisé dans bDelete de Bdd**
 
