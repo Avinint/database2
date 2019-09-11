@@ -867,6 +867,14 @@ class Bdd  extends UndeadBrain
         throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
     }
 
+    /**
+     * Permet de générer une clause case de BDD pour faire correspondre une valeur à un libellé.
+     * 
+     * @param  string $sNomChamp Nom du champ contenant la valeur.
+     * @param  array  $aLibelle  Tableau de correspondance valeur => libellé.
+     * 
+     * @return string            Clause CASE.
+     */
     protected function sGetClauseCase($sNomChamp, $aLibelle)
     {
         $sRequete = '
