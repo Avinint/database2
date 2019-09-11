@@ -283,9 +283,6 @@ class Bdd  extends UndeadBrain
      */
     public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '', $szContexte = '')
     {
-        if (($nNbElements == 0 || $nNbElements == '') && isset($_REQUEST['nNbElementsParPage']) === true) {
-            // $nNbElements = $_REQUEST['nNbElementsParPage'];
-        }
 
         if ($nStart == '') {
             $nStart = 0;
@@ -868,6 +865,28 @@ class Bdd  extends UndeadBrain
         }
 
         throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
+    }
+
+    protected function sGetClauseCase($sNomChamp, $aLibelle)
+    {
+        $sRequete = '
+            CASE
+                '.$sNomChamp.'
+        ';
+        foreach ($aLibelle as $sValeur => $sLibelle) {
+            $sRequete .= '
+                WHEN
+                    \''.$sValeur.'\'
+                THEN
+                    \''.$sLibelle.'\'
+            ';
+        }
+        $sRequete .= '
+                ELSE
+                    '.$sNomChamp.'
+            END
+        ';
+        return $sRequete;
     }
 
 }
