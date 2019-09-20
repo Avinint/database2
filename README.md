@@ -1,6 +1,6 @@
 # Version courante : 1.0.24
 
-* **v1.0.24 : Ajout d'une méthode pour générer des CASE permettant de retourner le libellé à la place de la valeur.**
+* **v1.0.24 : Ajout d'un paramètre bExceptionSurContrainte (false par défaut) permettant de lancer une exception en cas de violation de contrainte (si true) ou non (si false).**
 
 * **v1.0.23 : Ajout d'une méthode pour générer des CASE permettant de retourner le libellé à la place de la valeur.**
 
