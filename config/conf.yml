@@ -10,3 +10,5 @@ aNamespace:
     data: 
       BaseAdminAction:   APP\Modules\Base\Controllers\BaseAdminAction
       Bdd:   APP\Modules\Base\Lib\Bdd
+
+bExceptionSurContrainte: false # si false => les violations de contraintes (intégrité, unicité (liste à compléter)) ne throw pas d'exceptions (utiliser le retour = null). Si true => une exception est toujours thrown.

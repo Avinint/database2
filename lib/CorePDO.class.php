@@ -6,11 +6,15 @@ use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
 class CorePDO extends \PDO
 {
     public $sMessagePDO;
+    private static $bExceptionSurContrainte;
 
     public function __construct($szBase = '', $szLogin = '', $szMotDePasse = '')
     {
         $this->sMessagePDO = '';
         parent::__construct($szBase, $szLogin, $szMotDePasse);
+        if (isset(self::$bExceptionSurContrainte) === false) {
+            self::$bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
+        }
     }
 
     public function query($szRequete = '')
@@ -33,9 +37,24 @@ class CorePDO extends \PDO
              * [2] => Message d'erreur spécifique au driver
              * @var array $infosErreur
              */
+            $sCodeErreur = $e->getCode();
             $this->sMessagePDO = $this->sGetMessagePDO($e);
-            throw $e;
+            
         } finally {
+            if (isset($e) === true) {
+                if (self::$bExceptionSurContrainte === true) {
+                    throw $e;
+                } else {
+                    switch ($sCodeErreur) {
+                        // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
+                        case '23000': // Violation de contrainte d'intégrité
+                            break;
+                        default:
+                            throw $e;
+                            break;
+                    }
+                }
+            }
             return $mResultat;
         }
     }
