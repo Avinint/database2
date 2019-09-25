@@ -699,7 +699,7 @@ class Bdd  extends UndeadBrain
         }
         catch(\PDOException $e)
         {
-            $this->sMessagePDO = $e->getMessage();
+            $this->rConnexion->sMessagePDO = $e->getMessage();
             return false;
         }
         
