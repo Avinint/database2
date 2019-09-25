@@ -1,6 +1,6 @@
 # Version courante : 1.0.25
 
-* **v1.0.25 : Correctif de sMessagePDO en cas d'erreur SQL**
+* **v1.0.25 : Correctif de sMessagePDO en cas d'erreur SQL sur les requêtes préparées**
 
 * **v1.0.24 : Ajout d'un paramètre bExceptionSurContrainte (false par défaut) permettant de lancer une exception en cas de violation de contrainte (si true) ou non (si false).**
 
