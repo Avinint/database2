@@ -749,7 +749,9 @@ class Bdd  extends UndeadBrain
         {
             $sNomChampId = $this->sGetNomChampId();
             $this->$sNomChampId = $this->rConnexion->lastInsertId();
-            $this->bSetLog("insert_{$this->sNomTable}", $this->$sNomChampId);
+            if ($this->sNomTable != 'logs') {
+                $this->bSetLog("insert_{$this->sNomTable}", $this->$sNomChampId);
+            }
         }
 
         return $bRetour;
@@ -798,7 +800,9 @@ class Bdd  extends UndeadBrain
         }
         else
         {
-            $this->bSetLog("update_{$this->sNomTable}", $this->$sNomChampId);
+            if ($this->sNomTable != 'logs') {
+                $this->bSetLog("update_{$this->sNomTable}", $this->$sNomChampId);
+            }
         }
 
         return $bRetour;
@@ -847,7 +851,9 @@ class Bdd  extends UndeadBrain
         }
         else
         {
-            $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
+            if ($this->sNomTable != 'logs') {
+                $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
+            }
         }
 
         return $bRetour;
