@@ -81,19 +81,19 @@ class Bdd  extends UndeadBrain
                     $GLOBALS['aParamsAppli']['encodage'] = 'UTF-8';
                 }
 
-                if ($sHote == '') {
+                if ($sHote == '' && isset($GLOBALS['aParamsBdd']['hote']) === true) {
                     $sHote = $GLOBALS['aParamsBdd']['hote'];
                 }
-                if ($sNomBase == '') {
+                if ($sNomBase == '' && isset($GLOBALS['aParamsBdd']['base']) === true) {
                     $sNomBase = $GLOBALS['aParamsBdd']['base'];
                 }
-                if ($sUtilisateur == '') {
+                if ($sUtilisateur == '' && isset($GLOBALS['aParamsBdd']['utilisateur']) === true) {
                     $sUtilisateur = $GLOBALS['aParamsBdd']['utilisateur'];
                 }
-                if ($sMotDePasse == '') {
+                if ($sMotDePasse == '' && isset($GLOBALS['aParamsBdd']['mot_de_passe']) === true) {
                     $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
                 }
-                if ($sEncodage == '') {
+                if ($sEncodage == '' && isset($GLOBALS['aParamsBdd']['encodage']) === true) {
 
                     $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
 
