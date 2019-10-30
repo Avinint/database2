@@ -1,4 +1,4 @@
-# Version courante : 1.0.26
+# Version courante : 1.0.28
 
 * **v1.0.28 : Rajout du finally dans la fonction bExecuterRequetePrepare pour gérer les erreurs mysql** 
 
