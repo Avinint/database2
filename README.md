@@ -1,5 +1,9 @@
 # Version courante : 1.0.25
 
+* **v1.0.27 : Rajout du finally dans la fonction bExecuterRequetePrepare pour gérer les erreurs mysql** 
+
+* **v1.0.26 : Modification des appels à bSetLog dans les cruds**
+
 * **v1.0.25 : Correctif de sMessagePDO en cas d'erreur SQL sur les requêtes préparées**
 
 * **v1.0.24 : Ajout d'un paramètre bExceptionSurContrainte (false par défaut) permettant de lancer une exception en cas de violation de contrainte (si true) ou non (si false).**

@@ -4,6 +4,7 @@ namespace APP\Modules\Base\Lib;
 use APP\Core\Lib\Interne\PHP\UndeadBrain as UndeadBrain;
 use APP\Modules\Base\Lib\CorePDO as CorePDO;
 use APP\Modules\Base\Lib\CorePDOSqlite;
+use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
 
 class Bdd  extends UndeadBrain
 {
@@ -693,14 +694,42 @@ class Bdd  extends UndeadBrain
      */
     protected function bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare = array())
     {
+        $mResultat = false;
         try
         {
-            return $oRequetePrepare->execute($aChampsPrepare);
+            $mResultat = $oRequetePrepare->execute($aChampsPrepare);
         }
-        catch(\PDOException $e)
-        {
-            $this->rConnexion->sMessagePDO = $e->getMessage();
-            return false;
+        catch (\PDOException $e) {
+            $oUtiles = new Utiles;
+            if (method_exists($oUtiles, 'vLogRequete')) {
+                $oUtiles->vLogRequete($szRequete, true);
+            }
+            /**
+             * Contient les infos sur l'erreur SQL :
+             * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)
+             * [1] => Code d'erreur du driver spécifique
+             * [2] => Message d'erreur spécifique au driver
+             * @var array $infosErreur
+             */
+            $sCodeErreur = $e->getCode();
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        } finally {
+            if (isset($e) === true) {
+                $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
+                if ($bExceptionSurContrainte === true) {
+                    throw $e;
+                } else {
+                    switch ($sCodeErreur) {
+                        // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
+                        case '23000': // Violation de contrainte d'intégrité
+                            break;
+                        default:
+                            throw $e;
+                            break;
+                    }
+                }
+            }
+            return $mResultat;
         }
         
     }
