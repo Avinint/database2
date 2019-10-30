@@ -1,4 +1,6 @@
-# Version courante : 1.0.25
+# Version courante : 1.0.26
+
+* **v1.0.26 : Ajout de isset pour tester des GLOBALS**
 
 * **v1.0.27 : Rajout du finally dans la fonction bExecuterRequetePrepare pour gérer les erreurs mysql** 
 
