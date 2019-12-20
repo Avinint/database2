@@ -84,16 +84,16 @@ class BaseAdminAction extends Bdd
 
         $oBdd = $this->oNew('Bdd');
         
-        $aElements = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable);
+        // $aElements = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable);
 
-        if (isset($_REQUEST['bAvecMore']) === true && $_REQUEST['bAvecMore'] == true) {
-            $aRetour['aSelect2'] = array(
-                'results' => $aElements,
-                'more' => true,
-            );
-        } else {
-            $aRetour['aSelect2'] = $aElements;
-        }
+        // if (isset($_REQUEST['bAvecMore']) === true && $_REQUEST['bAvecMore'] == true) {
+        //     $aRetour['aSelect2'] = array(
+        //         'results' => $aElements,
+        //         'more' => true,
+        //     );
+        // } else {
+        //     $aRetour['aSelect2'] = $aElements;
+        // }
 
         $aRetour['aSelect2'] = $oBdd->aGetSelect2JSON($aRecherche, $aChamps, $sTable, $sOrderBy, $sRestriction);
       

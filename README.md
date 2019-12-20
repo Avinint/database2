@@ -1,4 +1,6 @@
-# Version courante : 1.0.28
+# Version courante : 1.0.29
+
+* **v1.0.29 : suppression de lignes de code inutiles (avec exécution de 2 requêtes)** 
 
 * **v1.0.28 : Rajout du finally dans la fonction bExecuterRequetePrepare pour gérer les erreurs mysql** 
 

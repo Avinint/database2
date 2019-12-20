@@ -544,6 +544,7 @@ class Bdd  extends UndeadBrain
             WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . addslashes($aRecherche['sTerm']) . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . addslashes($aRecherche['sTerm']) . "%') ".$sRestriction."
 			ORDER BY ".$sOrderBy." ASC
         ";
+        // echo $szRequete."\r\n";
 		$aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
 
         return $aResultats;
