@@ -701,10 +701,10 @@ class Bdd  extends UndeadBrain
             $mResultat = $oRequetePrepare->execute($aChampsPrepare);
         }
         catch (\PDOException $e) {
-            $oUtiles = new Utiles;
-            if (method_exists($oUtiles, 'vLogRequete')) {
-                $oUtiles->vLogRequete($szRequete, true);
-            }
+            // $oUtiles = new Utiles;
+            // if (method_exists($oUtiles, 'vLogRequete')) {
+            //     $oUtiles->vLogRequete($szRequete, true);
+            // }
             /**
              * Contient les infos sur l'erreur SQL :
              * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)

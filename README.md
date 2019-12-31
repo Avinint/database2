@@ -1,4 +1,6 @@
-# Version courante : 1.0.29
+# Version courante : 1.0.30
+
+* **v1.0.30 : Suppression de log de requête qui ne sert plus à rien avec les requêtes préparées** 
 
 * **v1.0.29 : suppression de lignes de code inutiles (avec exécution de 2 requêtes)** 
 
