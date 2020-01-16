@@ -845,8 +845,6 @@ class Bdd  extends UndeadBrain
      * sNomChampId doit être défini en plus
      * du nom de la table
      * 
-     * @param int La clé primaire de l'élément
-     * 
      * @return bool Vrai en cas de succès, faux sinon
      */
     public function bDelete()

@@ -1,4 +1,6 @@
-# Version courante : 1.0.30
+# Version courante : 1.0.31
+
+* **v1.0.31 : Mise a jour du commentaire de la méthode bDelete.** 
 
 * **v1.0.30 : Suppression de log de requête qui ne sert plus à rien avec les requêtes préparées** 
 
