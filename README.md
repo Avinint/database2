@@ -1,4 +1,6 @@
-# Version courante : 1.0.31
+# Version courante : 1.0.32
+
+* **v1.0.32 : Création d'une méthode sGetNomChamp pour obtenir le nom du champ mappé à partir d'un nom de champ** 
 
 * **v1.0.31 : Mise a jour du commentaire de la méthode bDelete.** 
 

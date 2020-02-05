@@ -931,4 +931,18 @@ class Bdd  extends UndeadBrain
         return $sRequete;
     }
 
+    /**
+     * Renvoie le champ mappé sur le champ
+     * @param  string $sNomChamp nom du champ
+     * 
+     * @return string Nom du champ mappé (Ex : nIdTrucMuche)
+     */
+    public function sGetNomChamp($sNomChamp = '') {
+        $sRetour = '';
+        if(isset($this->aMappingChamps[$sNomChamp])) {
+            $sRetour = $this->aMappingChamps[$sNomChamp];
+        }
+        return $sRetour;
+    }
+
 }
