@@ -1,4 +1,6 @@
-# Version courante : 1.0.32
+# Version courante : 1.0.33
+
+* **v1.0.33 : debug de sGetClauseCase pour les cas où il y a une apostrophe dans les libellés** 
 
 * **v1.0.32 : Création d'une méthode sGetNomChamp pour obtenir le nom du champ mappé à partir d'un nom de champ** 
 

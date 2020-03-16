@@ -920,7 +920,7 @@ class Bdd  extends UndeadBrain
                 WHEN
                     \''.$sValeur.'\'
                 THEN
-                    \''.$sLibelle.'\'
+                    \''.addslashes($sLibelle).'\'
             ';
         }
         $sRequete .= '
