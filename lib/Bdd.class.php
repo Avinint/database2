@@ -945,4 +945,16 @@ class Bdd  extends UndeadBrain
         return $sRetour;
     }
 
+    /**
+     * Récupération des données pour impression de PDF
+     * @param  array  $aRecherche
+     * @param  string $sOrderBy
+     * @param  string $sGroupBy
+     * @param  string $sContexte
+     * @return array
+     */
+    public function aRecupereDonneesPdf($aRecherche = array(), $sOrderBy = '', $sGroupBy = '', $sContexte = '') {
+        $aRetour = $this->aGetElements($aRecherche, 0, '', $sOrderBy, $sGroupBy, $sContexte);
+        return $aRetour;
+    }
 }

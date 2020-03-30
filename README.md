@@ -1,4 +1,6 @@
-# Version courante : 1.0.33
+# Version courante : 1.0.34
+
+* **v1.0.34 : Ajout d'une méthode générique aRecupereDonneesPdf utilisée pour la ressource PDF** 
 
 * **v1.0.33 : debug de sGetClauseCase pour les cas où il y a une apostrophe dans les libellés** 
 
