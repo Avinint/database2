@@ -1,4 +1,6 @@
-# Version courante : 1.0.35
+# Version courante : 1.0.36
+
+* **v1.0.36 : Ajout d'un test pour éviter de créer des notices si aucune restriction n'est définie lors du chargement des select ajax.** 
 
 * **v1.0.35 : Ajout d'un test pour vérifier si la ressource logs est présente avant d'essayer de logguer** 
 

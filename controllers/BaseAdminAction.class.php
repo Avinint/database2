@@ -78,7 +78,12 @@ class BaseAdminAction extends Bdd
         $aChamps = $_POST['aChamps'];
         $sTable = $_POST['sTable'];
         $sOrderBy = $_POST['sOrderBy'];
-        $sRestriction = $_POST['sRestriction'];
+        if (isset($_POST['sRestriction'])) {
+            $sRestriction = $_POST['sRestriction'];
+        } else {
+            $sRestriction = '';
+        }
+        
 
         $aRecherche['sTerm'] = $_POST['sResearch'];
 
