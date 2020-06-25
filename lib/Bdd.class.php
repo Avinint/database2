@@ -33,6 +33,8 @@ class Bdd  extends UndeadBrain
      */
     public $sNomTable;
 
+    private static $bPresenceRessourceLogs;
+
     /**
      * Constructeur de la classe
      *
@@ -50,6 +52,14 @@ class Bdd  extends UndeadBrain
 
         $this->sNomTable = "";
         $this->sNomChampIdBdd = "";
+    }
+
+    public function bRessourceLogsPresente()
+    {
+        if (!isset(self::$bPresenceRessourceLogs)) {
+            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']);
+        }
+        return self::$bPresenceRessourceLogs;
     }
 
 
@@ -779,7 +789,7 @@ class Bdd  extends UndeadBrain
         {
             $sNomChampId = $this->sGetNomChampId();
             $this->$sNomChampId = $this->rConnexion->lastInsertId();
-            if ($this->sNomTable != 'logs') {
+            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
                 $this->bSetLog("insert_{$this->sNomTable}", $this->$sNomChampId);
             }
         }
@@ -830,7 +840,7 @@ class Bdd  extends UndeadBrain
         }
         else
         {
-            if ($this->sNomTable != 'logs') {
+            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
                 $this->bSetLog("update_{$this->sNomTable}", $this->$sNomChampId);
             }
         }
@@ -879,7 +889,7 @@ class Bdd  extends UndeadBrain
         }
         else
         {
-            if ($this->sNomTable != 'logs') {
+            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
                 $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
             }
         }

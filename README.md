@@ -1,4 +1,6 @@
-# Version courante : 1.0.34
+# Version courante : 1.0.35
+
+* **v1.0.35 : Ajout d'un test pour vérifier si la ressource logs est présente avant d'essayer de logguer** 
 
 * **v1.0.34 : Ajout d'une méthode générique aRecupereDonneesPdf utilisée pour la ressource PDF** 
 
