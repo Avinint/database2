@@ -84,8 +84,12 @@ class BaseAdminAction extends Bdd
             $sRestriction = '';
         }
         
-
-        $aRecherche['sTerm'] = $_POST['sResearch'];
+        if (isset($_POST['sResearch'])) {
+            $aRecherche['sTerm'] = $_POST['sResearch'];
+        } else {
+            $aRecherche['sTerm'] = '';
+        }
+        
 
         $oBdd = $this->oNew('Bdd');
         

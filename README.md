@@ -1,4 +1,6 @@
-# Version courante : 1.0.36
+# Version courante : 1.0.37
+
+* **v1.0.37 : Ajout d'un test pour éviter de créer des notices si on affiche toutes les options dans un select ajax sans attendre que l'utilisateur aie commencé à saisir du texte (absence de $_REQUEST['sResearch']).**
 
 * **v1.0.36 : Ajout d'un test pour éviter de créer des notices si aucune restriction n'est définie lors du chargement des select ajax.** 
 
