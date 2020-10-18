@@ -1,4 +1,6 @@
-# Version courante : 1.0.37
+# Version courante : 1.0.39
+
+* **v1.0.39 : Exclusion des vues de la liste des tables.**
 
 * **v1.0.38 : Ajout de méthodes génériques dans Bdd afin de gérer les débuts et fins de transaction depuis les classes métier.**
 
