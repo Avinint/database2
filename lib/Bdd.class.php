@@ -347,7 +347,7 @@ class Bdd  extends UndeadBrain
             $this->vConnexionBdd();
         }
 
-        $sRequete = "SHOW tables FROM `".$GLOBALS['aParamsBdd']['base']."`";
+        $sRequete = "SHOW FULL tables FROM `".$GLOBALS['aParamsBdd']['base']."`  where Table_Type != 'VIEW'";
 
         $aResultats = $this->aSelectBDD($sRequete);
 
