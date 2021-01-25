@@ -1,4 +1,6 @@
-# Version courante : 1.0.39
+# Version courante : 1.0.40
+
+* **v1.0.40 : Ajout d'une méthode permettant l'insertion d'une ligne si elle n'existe pas déjà.**
 
 * **v1.0.39 : Exclusion des vues de la liste des tables.**
 
