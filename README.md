@@ -1,4 +1,6 @@
-# Version courante : 1.0.42
+# Version courante : 1.0.43
+
+* **v1.0.43 : Ajout d'infos de debug dans les logs lors de l'échec des requêtes.**
 
 * **v1.0.42 : Renommage d'une fonction et ajout de fonctions de compatibilité SQL avec SQLite.**
 

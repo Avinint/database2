@@ -4,6 +4,8 @@ namespace APP\Modules\Base\Lib;
 
 class CorePDOSqlite extends \PDO
 {
+    public $sMessagePDO = '';
+
     public function __construct($szBase = '')
     {
         parent::__construct($szBase);
@@ -30,7 +32,8 @@ class CorePDOSqlite extends \PDO
         }
         
         if ($mResult === false) {
-            var_dump(parent::errorInfo());
+            $this->sMessagePDO = parent::errorInfo();
+            error_log(print_r($this->sMessagePDO, true));
         }
         return $mResult;
     }
@@ -38,8 +41,15 @@ class CorePDOSqlite extends \PDO
     public function aSelectBDD($szRequete = '', $aMappingChamps = array(), $szAlias = '')
     {
         $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
+        
+        $mResult = parent::aSelectBDD($szRequete);
+        
+        if ($mResult === false) {
+            $this->sMessagePDO = parent::errorInfo();
+            error_log(print_r($this->sMessagePDO, true));
+        }
 
-        return parent::aSelectBDD($szRequete);
+        return $mResult;
     // {
     //     $objMemCache = new \Memcache;
     //     $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');

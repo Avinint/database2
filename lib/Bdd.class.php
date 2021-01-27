@@ -309,6 +309,11 @@ class Bdd  extends UndeadBrain
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
 
+        if ($this->rConnexion->sMessagePDO != '') {
+            // echo '--------->'.$this->rConnexion->sMessagePDO;
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+
         // echo '<pre>'.print_r($aResultats, true).'</pre>';
 
         return $aResultats;
@@ -1040,6 +1045,7 @@ class Bdd  extends UndeadBrain
         $rLien = $this->rConnexion->query($sRequete);
 
         if (!$rLien) {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
             error_log($sRequete);
             return false;
         }
