@@ -1,4 +1,6 @@
-# Version courante : 1.0.40
+# Version courante : 1.0.42
+
+* **v1.0.42 : Renommage d'une fonction et ajout de fonctions de compatibilité SQL avec SQLite.**
 
 * **v1.0.40 : Ajout d'une méthode permettant l'insertion d'une ligne si elle n'existe pas déjà.**
 

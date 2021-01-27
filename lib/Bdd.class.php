@@ -975,7 +975,7 @@ class Bdd  extends UndeadBrain
      * @param  object  $oUnElement  Ligne à insérer.
      * @return boolean              Succès ou échec.
      */
-    public function bSynchroDescendante($sCleSynchro, $oUnElement)
+    public function bInsertionLigneSiAbsente($sCleSynchro, $oUnElement)
     {
         $sClePrimaire = $this->sNomCle;
         $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
@@ -1042,5 +1042,63 @@ class Bdd  extends UndeadBrain
         }
 
         return true;
+    }
+
+    /**
+     * Conversion de date pour inclure dans une
+     * requête SQL via MySQL ou SQLite.
+     * @param  string $sDate   Date à utiliser.
+     * @param  string $sFormat Format de la date au final.
+     * @return string          Chaine à inclure dans le SQL.
+     */
+    protected function sDateFormat($sDate, $sFormat)
+    {
+        if (!preg_match('/\./', $sDate)) {
+            $sDate = "'" . $sDate . "'";
+        }
+
+        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
+            // SQLite
+            $sFormat = str_replace('%i', '%M', $sFormat);
+            $sFormat = str_replace('\h', 'h', $sFormat);
+            return 'strftime("' . $sFormat . '", ' . $sDate . ')';
+        } else {
+            // MySQL
+            return 'DATE_FORMAT(' . $sDate . ', \'' . $sFormat . '\')';
+        }
+    }
+
+    /**
+     * Concatène des chaines pour inclure dans une
+     * requête SQL via MySQL ou SQLite.
+     * @param  array $aChaine Chaines à concaténer.
+     * @return string         Chaine à inclure dans le SQL.
+     */
+    protected function sConcat($aChaine)
+    {
+        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
+            // SQLite
+            $aChaine = array_map(function($sChaine) 
+            {
+                if (preg_match('/strftime|\./', $sChaine)) {
+                    return $sChaine;
+                } else {
+                    return "'" . $sChaine . "'";
+                }
+            }, $aChaine);
+
+            return implode(" || ", $aChaine);
+        } else {
+            // MySQL
+            $aChaine = array_map(function($sChaine) 
+            {
+                if (preg_match('/DATE_FORMAT|\./', $sChaine)) {
+                    return $sChaine;
+                } else {
+                    return "'" . $sChaine . "'";
+                }
+            }, $aChaine);
+            return 'CONCAT(' . implode(", ", $aChaine) . ')';
+        }
     }
 }
