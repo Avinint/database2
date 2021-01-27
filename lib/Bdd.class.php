@@ -783,6 +783,9 @@ class Bdd  extends UndeadBrain
 
         if($bRetour === false)
         {
+            error_log($sRequete);
+            error_log('<pre>'.print_r($aPreparationRequete['aChampsPrepare'], true).'</pre>');
+            error_log('sMessagePDO ----> '.$this->sMessagePDO);
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
         }
         else
