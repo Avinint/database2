@@ -2,6 +2,8 @@
 
 * **v1.0.42 : Renommage d'une fonction et ajout de fonctions de compatibilité SQL avec SQLite.**
 
+* **v1.0.41 : Ajout d'error_log lors de l'échec d'un insert.**
+
 * **v1.0.40 : Ajout d'une méthode permettant l'insertion d'une ligne si elle n'existe pas déjà.**
 
 * **v1.0.39 : Exclusion des vues de la liste des tables.**
