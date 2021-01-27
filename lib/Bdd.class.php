@@ -970,4 +970,80 @@ class Bdd  extends UndeadBrain
         $aRetour = $this->aGetElements($aRecherche, 0, '', $sOrderBy, $sGroupBy, $sContexte);
         return $aRetour;
     }
+
+
+    /**
+     * Insertion d'une ligne dans la base si absente.
+     * @param  string  $sCleSynchro Clé de synchro.
+     * @param  object  $oUnElement  Ligne à insérer.
+     * @return boolean              Succès ou échec.
+     */
+    public function bSynchroDescendante($sCleSynchro, $oUnElement)
+    {
+        $sClePrimaire = $this->sNomCle;
+        $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
+        $sTable = $this->sNomTable;
+        $aChamps = [];
+        $aValeur = [];
+
+        // On regarde si la ligne existe déjà.
+        $sRequete = 'SELECT COUNT(' . $sClePrimaire . ') AS nNbElement '
+                  . 'FROM ' . $sTable . ' '
+                  . 'WHERE 1 ';
+
+        if (isset($this->aClePrimaire) === true) {
+            foreach ($this->aClePrimaire as $sClePrimaire) {
+                $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
+                $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
+            }
+        } else {
+            $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
+        }
+
+        $aPartie = $this->aSelectBDD($sRequete);
+
+        $bModif = false;
+        if ($aPartie[0]->nNbElement > 0) {
+            $bModif = true;
+        }
+
+        if ($bModif === false) {
+            // Si elle n'existe pas, on l'insère.
+
+            $aMappingChamps = array_flip($this->aMappingChamps);
+            foreach ($oUnElement as $sAliasChamp => $sValeur) {
+                if ($sAliasChamp == 'nIdElement') {
+                    // On ignore le nIdElement qui est un
+                    // reliquat de la classe model.
+                    continue;
+                }
+                if (isset($aMappingChamps[$sAliasChamp]) === false) {
+                    // Si le champ n'est pas présent dans le mappingchamp
+                    // c'est une erreur grave ! On s'arrête !
+                    error_log('Erreur : champ introuvable dans le mapping champ de ' . $sTable . ' : ' . $sAliasChamp);
+                    return false;
+                }
+                if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
+                    continue;
+                }
+                // echo '-> '.$aMappingChamps[$sAliasChamp]."\n";
+
+                $aChamps[] = $aMappingChamps[$sAliasChamp];
+                $aValeur[] = addslashes($sValeur);
+            }
+
+            $sRequete = 'INSERT INTO ' . $sTable . ' (' . implode(', ', $aChamps) . ') '
+                    . 'VALUES(\'' . implode('\', \'', $aValeur) . '\''
+                    . ')';
+        }
+
+        $rLien = $this->rConnexion->query($sRequete);
+
+        if (!$rLien) {
+            error_log($sRequete);
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -2,6 +2,8 @@
 
 * **v1.0.41 : Ajout d'error_log lors de l'échec d'un insert.**
 
+* **v1.0.40 : Ajout d'une méthode permettant l'insertion d'une ligne si elle n'existe pas déjà.**
+
 * **v1.0.39 : Exclusion des vues de la liste des tables.**
 
 * **v1.0.38 : Ajout de méthodes génériques dans Bdd afin de gérer les débuts et fins de transaction depuis les classes métier.**
