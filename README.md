@@ -1,4 +1,6 @@
-# Version courante : 1.0.39
+# Version courante : 1.0.41
+
+* **v1.0.41 : Ajout d'error_log lors de l'échec d'un insert.**
 
 * **v1.0.39 : Exclusion des vues de la liste des tables.**
 
