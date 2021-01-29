@@ -24,6 +24,7 @@ class Bdd  extends UndeadBrain
     protected $aMappingChamps;
 
     public $sMessagePDO;
+    public $sRequeteErreur;
     
     public $aTitreLibelle;
 
@@ -312,6 +313,7 @@ class Bdd  extends UndeadBrain
         if ($this->rConnexion->sMessagePDO != '') {
             // echo '--------->'.$this->rConnexion->sMessagePDO;
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+            $this->sRequeteErreur = $this->rConnexion->sRequeteErreur;
         }
 
         // echo '<pre>'.print_r($aResultats, true).'</pre>';
