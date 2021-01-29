@@ -1,4 +1,6 @@
-# Version courante : 1.0.43
+# Version courante : 1.0.44
+
+* **v1.0.44 : Ajout d'infos de debug supplémentaires dans les logs lors de l'échec des requêtes.**
 
 * **v1.0.43 : Ajout d'infos de debug dans les logs lors de l'échec des requêtes.**
 

@@ -5,6 +5,7 @@ namespace APP\Modules\Base\Lib;
 class CorePDOSqlite extends \PDO
 {
     public $sMessagePDO = '';
+    public $sRequeteErreur = '';
 
     public function __construct($szBase = '')
     {
@@ -33,6 +34,8 @@ class CorePDOSqlite extends \PDO
         
         if ($mResult === false) {
             $this->sMessagePDO = parent::errorInfo();
+            $this->sRequeteErreur = $szRequete;
+            error_log($this->sRequeteErreur);
             error_log(print_r($this->sMessagePDO, true));
         }
         return $mResult;
