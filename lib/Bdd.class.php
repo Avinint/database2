@@ -33,6 +33,8 @@ class Bdd  extends UndeadBrain
      */
     public $sNomTable;
 
+    public $sLog;
+
     private static $bPresenceRessourceLogs;
 
     /**
@@ -52,6 +54,7 @@ class Bdd  extends UndeadBrain
 
         $this->sNomTable = "";
         $this->sNomChampIdBdd = "";
+        $this->sLog = '';
     }
 
     public function bRessourceLogsPresente()
@@ -977,13 +980,149 @@ class Bdd  extends UndeadBrain
     }
 
 
+    public function bInsertionLigneOuMiseAJourSiExiste($sCleSynchro, $oUnElement)
+    {
+        $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
+
+        if ($aLigneExiste['bExiste'] === false) {
+            $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
+            $this->sLog .= "- Insertion car absente\n";
+            $this->sLog .= "----> $sRequete\n";
+        } else {
+            $sRequete = $this->sRequeteSqlUpdateLigne($aLigneExiste);
+            $this->sLog .= "- Mise à jour car présente\n";
+            $this->sLog .= "----> $sRequete\n";
+        }
+
+        $rLien = $this->rConnexion->query($sRequete);
+
+        if (!$rLien) {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+            error_log($sRequete);
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function sRequeteSqlInsertLigne($aLigneExiste)
+    {
+        return 'INSERT INTO ' . $this->sNomTable . ' (' . implode(', ', $aLigneExiste['aChamps']) . ') '
+                    . 'VALUES(\'' . implode('\', \'', $aLigneExiste['aValeur']) . '\''
+                    . ')';
+    }
+
+    protected function sRequeteSqlUpdateLigne($aLigneExiste)
+    {
+        $sRequete = 'UPDATE ' . $this->sNomTable . ' SET ' . implode(', ', $aLigneExiste['aChamps']) . ' '
+                    . 'WHERE 1 ';
+        foreach ($aLigneExiste['oLigne'] as $sChamp => $sValeur) {
+            $sRequete .= 'AND ' . $sChamp . ' = \'' . addslashes($sValeur) . '\' ';
+        }
+        return $sRequete;
+    }
+
+    public function bInsertionLigneSiAbsente($sCleSynchro, $oUnElement)
+    {
+        $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
+
+        if ($aLigneExiste['bExiste'] === false) {
+            $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
+
+            $this->sLog .= "- Insertion car absente\n";
+            $this->sLog .= "----> $sRequete\n";
+
+            $rLien = $this->rConnexion->query($sRequete);
+
+            if (!$rLien) {
+                $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+                error_log($sRequete);
+                return false;
+            }
+        } else {
+            $this->sLog .= "- On ne fait rien car présente\n";
+        }
+
+        return true;
+    }
+
+    public function bLigneExiste($sCleSynchro, $oUnElement)
+    {
+        $aRetour = [
+            'bExiste' => false,
+            'aClePrimaire' => [],
+            'aChamps' => [],
+        ];
+        $sClePrimaire = $this->sNomCle;
+        $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
+        $sTable = $this->sNomTable;
+
+        // On regarde si la ligne existe déjà.
+        $sRequete = 'SELECT ';
+        if (isset($this->aClePrimaire) === true) {
+            $sRequete .= implode(', ', $this->aClePrimaire);
+        } else {
+            $sRequete .= $sClePrimaire;
+        }
+        $sRequete .= ' FROM ' . $this->sNomTable . ' '
+                  . 'WHERE 1 ';
+
+        if (isset($this->aClePrimaire) === true) {
+            foreach ($this->aClePrimaire as $sClePrimaire) {
+                $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
+                $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
+            }
+        } else {
+            $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
+        }
+        $this->sLog .= "==============================\n";
+        $this->sLog .= "Recherche ligne\n";
+        $this->sLog .= "==============================\n";
+        $this->sLog .= "- Ligne existe ?\n";
+        $this->sLog .= "----> $sRequete\n";
+        $aElement = $this->aSelectBDD($sRequete);
+
+        $aRetour['bExiste'] = empty($aElement) === false;
+        $aRetour['oLigne'] = $aElement[0];
+
+        $aMappingChamps = array_flip($this->aMappingChamps);
+        foreach ($oUnElement as $sAliasChamp => $sValeur) {
+            if ($sAliasChamp == 'nIdElement') {
+                // On ignore le nIdElement qui est un
+                // reliquat de la classe model.
+                continue;
+            }
+            if (isset($aMappingChamps[$sAliasChamp]) === false) {
+                // Si le champ n'est pas présent dans le mappingchamp
+                // c'est une erreur grave ! On s'arrête !
+                error_log('Erreur : champ introuvable dans le mapping champ de ' . $this->sNomTable . ' : ' . $sAliasChamp);
+                return false;
+            }
+            if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
+                continue;
+            }
+            // echo '-> '.$aMappingChamps[$sAliasChamp]."\n";
+
+            if ($aRetour['bExiste'] === false) {
+                $aRetour['aChamps'][] = $aMappingChamps[$sAliasChamp];
+                $aRetour['aValeur'][] = addslashes($sValeur);
+            } else {
+                $aRetour['aChamps'][] = $aMappingChamps[$sAliasChamp] . ' = \'' . addslashes($sValeur) . '\' ';
+            }
+        }
+        // var_dump($aRetour);
+        return $aRetour;
+    }
+
+
     /**
      * Insertion d'une ligne dans la base si absente.
      * @param  string  $sCleSynchro Clé de synchro.
      * @param  object  $oUnElement  Ligne à insérer.
      * @return boolean              Succès ou échec.
      */
-    public function bInsertionLigneSiAbsente($sCleSynchro, $oUnElement)
+    /*
+    public function bInsertionLigneSiAbsente2($sCleSynchro, $oUnElement)
     {
         $sClePrimaire = $this->sNomCle;
         $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
@@ -1052,6 +1191,7 @@ class Bdd  extends UndeadBrain
 
         return true;
     }
+    */
 
     /**
      * Conversion de date pour inclure dans une
