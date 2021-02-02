@@ -24,6 +24,7 @@ class Bdd  extends UndeadBrain
     protected $aMappingChamps;
 
     public $sMessagePDO;
+    public $sRequeteErreur;
     
     public $aTitreLibelle;
 
@@ -315,6 +316,7 @@ class Bdd  extends UndeadBrain
         if ($this->rConnexion->sMessagePDO != '') {
             // echo '--------->'.$this->rConnexion->sMessagePDO;
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+            $this->sRequeteErreur = $this->rConnexion->sRequeteErreur;
         }
 
         // echo '<pre>'.print_r($aResultats, true).'</pre>';
@@ -1259,5 +1261,32 @@ class Bdd  extends UndeadBrain
     public function aGetMappingChamps()
     {
         return $this->aMappingChamps;
+    }
+
+    /**
+     * Démarrage du process
+     * @return void
+     */
+    public function bDemarreProcess()
+    {
+        $this->rConnexion->beginTransaction();
+    }
+
+    /**
+     * Annulation du process.
+     * @return void
+     */
+    public function bAnnuleProcess()
+    {
+        $this->rConnexion->rollBack();
+    }
+
+    /**
+     * Validation du process.
+     * @return void
+     */
+    public function bValideProcess()
+    {
+        $this->rConnexion->commit();
     }
 }

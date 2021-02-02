@@ -1,4 +1,6 @@
-# Version courante : 1.0.44
+# Version courante : 1.0.45
+
+* **v1.0.45 : Ajout d'infos de debug pour les erreurs SQL.**
 
 * **v1.0.44 : Ajout d'infos de debug supplémentaires dans les logs lors de l'échec des requêtes.**
 

@@ -20,6 +20,8 @@ class CorePDOSqlite extends \PDO
         // // echo '<pre>'.$szRequete.'</pre>';
         // }
 
+        $this->sRequeteErreur = '';
+        $this->sMessagePDO = '';
         $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
         $aRequetes = explode(';', $szRequete);
         foreach ($aRequetes as $szUneRequete) {
@@ -43,12 +45,16 @@ class CorePDOSqlite extends \PDO
 
     public function aSelectBDD($szRequete = '', $aMappingChamps = array(), $szAlias = '')
     {
+        $this->sRequeteErreur = '';
+        $this->sMessagePDO = '';
         $GLOBALS['szLogs'] .= '<pre>'.$szRequete.'</pre>';
         
         $mResult = parent::aSelectBDD($szRequete);
         
         if ($mResult === false) {
             $this->sMessagePDO = parent::errorInfo();
+            $this->sRequeteErreur = $szRequete;
+            error_log($this->sRequeteErreur);
             error_log(print_r($this->sMessagePDO, true));
         }
 
