@@ -1112,4 +1112,31 @@ class Bdd  extends UndeadBrain
             return 'CONCAT(' . implode(", ", $aChaine) . ')';
         }
     }
+
+    /**
+     * Démarrage du process
+     * @return void
+     */
+    public function bDemarreProcess()
+    {
+        $this->rConnexion->beginTransaction();
+    }
+
+    /**
+     * Annulation du process.
+     * @return void
+     */
+    public function bAnnuleProcess()
+    {
+        $this->rConnexion->rollBack();
+    }
+
+    /**
+     * Validation du process.
+     * @return void
+     */
+    public function bValideProcess()
+    {
+        $this->rConnexion->commit();
+    }
 }
