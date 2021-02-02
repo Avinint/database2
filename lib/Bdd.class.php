@@ -1250,4 +1250,14 @@ class Bdd  extends UndeadBrain
             return 'CONCAT(' . implode(", ", $aChaine) . ')';
         }
     }
+
+    /**
+     * Récupération du tableau de correspondance
+     * des champs avec leurs alias.
+     * @return array Tableau de correspondance.
+     */
+    public function aGetMappingChamps()
+    {
+        return $this->aMappingChamps;
+    }
 }
