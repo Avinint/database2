@@ -1208,7 +1208,7 @@ class Bdd  extends UndeadBrain
             $sDate = "'" . $sDate . "'";
         }
 
-        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
+        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true && $GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
             // SQLite
             $sFormat = str_replace('%i', '%M', $sFormat);
             $sFormat = str_replace('\h', 'h', $sFormat);
