@@ -1269,7 +1269,11 @@ class Bdd  extends UndeadBrain
      */
     public function bDemarreProcess()
     {
-        $this->rConnexion->beginTransaction();
+        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+            $this->rConnexion->query('BEGIN TRANSACTION;');
+        } else {
+            $this->rConnexion->beginTransaction();
+        }
     }
 
     /**
@@ -1278,7 +1282,11 @@ class Bdd  extends UndeadBrain
      */
     public function bAnnuleProcess()
     {
-        $this->rConnexion->rollBack();
+        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+            $this->rConnexion->query('ROLLBACK;');
+        } else {
+            $this->rConnexion->rollBack();
+        }
     }
 
     /**
@@ -1287,6 +1295,10 @@ class Bdd  extends UndeadBrain
      */
     public function bValideProcess()
     {
-        $this->rConnexion->commit();
+        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+            $this->rConnexion->query('COMMIT;');
+        } else {
+            $this->rConnexion->commit();
+        }
     }
 }
