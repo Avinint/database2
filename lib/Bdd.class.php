@@ -1085,7 +1085,7 @@ class Bdd  extends UndeadBrain
         $aElement = $this->aSelectBDD($sRequete);
 
         $aRetour['bExiste'] = empty($aElement) === false;
-        $aRetour['oLigne'] = $aElement[0];
+        $aRetour['oLigne'] = $aElement[0] ?? new \StdClass();
 
         $aMappingChamps = array_flip($this->aMappingChamps);
         foreach ($oUnElement as $sAliasChamp => $sValeur) {

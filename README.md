@@ -1,4 +1,6 @@
-# Version courante : 1.0.45
+# Version courante : 1.0.46
+
+* **v1.0.46 : Correction d'une notice dans Bdd.**
 
 * **v1.0.45 : Ajout d'infos de debug pour les erreurs SQL.**
 
