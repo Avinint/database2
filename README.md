@@ -1,4 +1,6 @@
-# Version courante : 1.0.46
+# Version courante : 1.0.52
+
+* **v1.0.52 : Possibilité de désactiver les transactions au besoin.**
 
 * **v1.0.46 : Correction d'une notice dans Bdd.**
 

@@ -37,6 +37,7 @@ class Bdd  extends UndeadBrain
     public $sLog;
 
     private static $bPresenceRessourceLogs;
+    public $bSansAnnulationProcess = false;
 
     /**
      * Constructeur de la classe
@@ -46,6 +47,7 @@ class Bdd  extends UndeadBrain
     public function __construct()
     {
         $this->sMessagePDO = '';
+        $this->bSansAnnulationProcess = false;
 
         // echo ' bdd ';
         // echo '-------- avant <pre>'.print_r($this->rConnexion, true).'</pre>';
@@ -721,6 +723,8 @@ class Bdd  extends UndeadBrain
             $mResultat = $oRequetePrepare->execute($aChampsPrepare);
         }
         catch (\PDOException $e) {
+            error_log('<pre>'.print_r($oRequetePrepare, true).'</pre>');
+            error_log('<pre>'.print_r($aChampsPrepare, true).'</pre>');
             // $oUtiles = new Utiles;
             // if (method_exists($oUtiles, 'vLogRequete')) {
             //     $oUtiles->vLogRequete($szRequete, true);
@@ -788,7 +792,6 @@ class Bdd  extends UndeadBrain
         
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
 
-        
         $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
 
         if($bRetour === false)
@@ -1269,10 +1272,12 @@ class Bdd  extends UndeadBrain
      */
     public function bDemarreProcess()
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-            $this->rConnexion->query('BEGIN TRANSACTION;');
-        } else {
-            $this->rConnexion->beginTransaction();
+        if ($this->bSansAnnulationProcess === false) {
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+                $this->rConnexion->query('BEGIN TRANSACTION;');
+            } else {
+                $this->rConnexion->beginTransaction();
+            }
         }
     }
 
@@ -1282,10 +1287,12 @@ class Bdd  extends UndeadBrain
      */
     public function bAnnuleProcess()
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-            $this->rConnexion->query('ROLLBACK;');
-        } else {
-            $this->rConnexion->rollBack();
+        if ($this->bSansAnnulationProcess === false) {
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+                $this->rConnexion->query('ROLLBACK;');
+            } else {
+                $this->rConnexion->rollBack();
+            }
         }
     }
 
@@ -1295,10 +1302,12 @@ class Bdd  extends UndeadBrain
      */
     public function bValideProcess()
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-            $this->rConnexion->query('COMMIT;');
-        } else {
-            $this->rConnexion->commit();
+        if ($this->bSansAnnulationProcess === false) {
+            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
+                $this->rConnexion->query('COMMIT;');
+            } else {
+                $this->rConnexion->commit();
+            }
         }
     }
 }
