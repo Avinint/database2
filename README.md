@@ -1,4 +1,6 @@
-# Version courante : 1.0.52
+# Version courante : 1.0.53
+
+* **v1.0.53 : Ajout d'une méthode dans Bdd permettant de récupérer la bonne méthode SQL pour le datetime courant.**
 
 * **v1.0.52 : Possibilité de désactiver les transactions au besoin.**
 

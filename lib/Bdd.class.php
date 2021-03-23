@@ -1223,6 +1223,23 @@ class Bdd  extends UndeadBrain
     }
 
     /**
+     * Retourne la fonction de base de données
+     * récupérant le datetime courant.
+     *
+     * @return string Fonction.
+     */
+    protected function sDatetimeCourant()
+    {
+        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
+            $sDate = 'datetime(\'now\')';
+        } else {
+            $sDate = 'NOW()';
+        }
+
+        return $sDate;
+    }
+
+    /**
      * Concatène des chaines pour inclure dans une
      * requête SQL via MySQL ou SQLite.
      * @param  array $aChaine Chaines à concaténer.
