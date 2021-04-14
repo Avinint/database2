@@ -1,4 +1,6 @@
-# Version courante : 1.0.53
+# Version courante : 1.1.0
+
+* **v1.1.0 : Utilisation de la méthode vLog en lieu et place des error_log. Attention, nécessite Core en 2.14**
 
 * **v1.0.53 : Ajout d'une méthode dans Bdd permettant de récupérer la bonne méthode SQL pour le datetime courant.**
 

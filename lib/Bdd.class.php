@@ -723,8 +723,8 @@ class Bdd  extends UndeadBrain
             $mResultat = $oRequetePrepare->execute($aChampsPrepare);
         }
         catch (\PDOException $e) {
-            error_log('<pre>'.print_r($oRequetePrepare, true).'</pre>');
-            error_log('<pre>'.print_r($aChampsPrepare, true).'</pre>');
+            $this->vLog('critical', '<pre>'.print_r($oRequetePrepare, true).'</pre>');
+            $this->vLog('critical', '<pre>'.print_r($aChampsPrepare, true).'</pre>');
             // $oUtiles = new Utiles;
             // if (method_exists($oUtiles, 'vLogRequete')) {
             //     $oUtiles->vLogRequete($szRequete, true);
@@ -796,9 +796,9 @@ class Bdd  extends UndeadBrain
 
         if($bRetour === false)
         {
-            error_log($sRequete);
-            error_log('<pre>'.print_r($aPreparationRequete['aChampsPrepare'], true).'</pre>');
-            error_log('sMessagePDO ----> '.$this->sMessagePDO);
+            $this->vLog('critical', $sRequete);
+            $this->vLog('critical', '<pre>'.print_r($aPreparationRequete['aChampsPrepare'], true).'</pre>');
+            $this->vLog('critical', 'sMessagePDO ----> '.$this->sMessagePDO);
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
         }
         else
@@ -1003,7 +1003,7 @@ class Bdd  extends UndeadBrain
 
         if (!$rLien) {
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-            error_log($sRequete);
+            $this->vLog('critical', $sRequete);
             return false;
         }
 
@@ -1041,7 +1041,7 @@ class Bdd  extends UndeadBrain
 
             if (!$rLien) {
                 $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-                error_log($sRequete);
+                $this->vLog('critical', $sRequete);
                 return false;
             }
         } else {
@@ -1100,7 +1100,7 @@ class Bdd  extends UndeadBrain
             if (isset($aMappingChamps[$sAliasChamp]) === false) {
                 // Si le champ n'est pas présent dans le mappingchamp
                 // c'est une erreur grave ! On s'arrête !
-                error_log('Erreur : champ introuvable dans le mapping champ de ' . $this->sNomTable . ' : ' . $sAliasChamp);
+                $this->vLog('critical', 'Erreur : champ introuvable dans le mapping champ de ' . $this->sNomTable . ' : ' . $sAliasChamp);
                 return false;
             }
             if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
@@ -1118,85 +1118,6 @@ class Bdd  extends UndeadBrain
         // var_dump($aRetour);
         return $aRetour;
     }
-
-
-    /**
-     * Insertion d'une ligne dans la base si absente.
-     * @param  string  $sCleSynchro Clé de synchro.
-     * @param  object  $oUnElement  Ligne à insérer.
-     * @return boolean              Succès ou échec.
-     */
-    /*
-    public function bInsertionLigneSiAbsente2($sCleSynchro, $oUnElement)
-    {
-        $sClePrimaire = $this->sNomCle;
-        $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
-        $sTable = $this->sNomTable;
-        $aChamps = [];
-        $aValeur = [];
-
-        // On regarde si la ligne existe déjà.
-        $sRequete = 'SELECT COUNT(' . $sClePrimaire . ') AS nNbElement '
-                  . 'FROM ' . $sTable . ' '
-                  . 'WHERE 1 ';
-
-        if (isset($this->aClePrimaire) === true) {
-            foreach ($this->aClePrimaire as $sClePrimaire) {
-                $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
-                $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
-            }
-        } else {
-            $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
-        }
-
-        $aPartie = $this->aSelectBDD($sRequete);
-
-        $bModif = false;
-        if ($aPartie[0]->nNbElement > 0) {
-            $bModif = true;
-        }
-
-        if ($bModif === false) {
-            // Si elle n'existe pas, on l'insère.
-
-            $aMappingChamps = array_flip($this->aMappingChamps);
-            foreach ($oUnElement as $sAliasChamp => $sValeur) {
-                if ($sAliasChamp == 'nIdElement') {
-                    // On ignore le nIdElement qui est un
-                    // reliquat de la classe model.
-                    continue;
-                }
-                if (isset($aMappingChamps[$sAliasChamp]) === false) {
-                    // Si le champ n'est pas présent dans le mappingchamp
-                    // c'est une erreur grave ! On s'arrête !
-                    error_log('Erreur : champ introuvable dans le mapping champ de ' . $sTable . ' : ' . $sAliasChamp);
-                    return false;
-                }
-                if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
-                    continue;
-                }
-                // echo '-> '.$aMappingChamps[$sAliasChamp]."\n";
-
-                $aChamps[] = $aMappingChamps[$sAliasChamp];
-                $aValeur[] = addslashes($sValeur);
-            }
-
-            $sRequete = 'INSERT INTO ' . $sTable . ' (' . implode(', ', $aChamps) . ') '
-                    . 'VALUES(\'' . implode('\', \'', $aValeur) . '\''
-                    . ')';
-        }
-
-        $rLien = $this->rConnexion->query($sRequete);
-
-        if (!$rLien) {
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-            error_log($sRequete);
-            return false;
-        }
-
-        return true;
-    }
-    */
 
     /**
      * Conversion de date pour inclure dans une

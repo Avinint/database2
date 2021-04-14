@@ -37,8 +37,13 @@ class CorePDOSqlite extends \PDO
         if ($mResult === false) {
             $this->sMessagePDO = parent::errorInfo();
             $this->sRequeteErreur = $szRequete;
-            error_log($this->sRequeteErreur);
-            error_log(print_r($this->sMessagePDO, true));
+            if (method_exists('\Log', 'vLog')) {
+                \Log::vSaveLog('critical', $this->sRequeteErreur);
+                \Log::vSaveLog('critical', print_r($this->sMessagePDO, true));
+            } else {
+                error_log($this->sRequeteErreur);
+                error_log(print_r($this->sMessagePDO, true));
+            }
         }
         return $mResult;
     }
@@ -54,8 +59,13 @@ class CorePDOSqlite extends \PDO
         if ($mResult === false) {
             $this->sMessagePDO = parent::errorInfo();
             $this->sRequeteErreur = $szRequete;
-            error_log($this->sRequeteErreur);
-            error_log(print_r($this->sMessagePDO, true));
+            if (method_exists('\Log', 'vLog')) {
+                \Log::vSaveLog('critical', $this->sRequeteErreur);
+                \Log::vSaveLog('critical', print_r($this->sMessagePDO, true));
+            } else {
+                error_log($this->sRequeteErreur);
+                error_log(print_r($this->sMessagePDO, true));
+            }
         }
 
         return $mResult;
