@@ -1,4 +1,6 @@
-# Version courante : 1.1.0
+# Version courante : 1.1.1
+
+* **v1.1.1 : Correction de notices dans Bdd.class.php**
 
 * **v1.1.0 : Utilisation de la méthode vLog en lieu et place des error_log. Attention, nécessite Core en 2.14**
 
