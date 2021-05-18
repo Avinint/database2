@@ -998,7 +998,7 @@ class Bdd  extends UndeadBrain
             $this->sLog .= "- Mise à jour car présente\n";
             $this->sLog .= "----> $sRequete\n";
         }
-
+        $this->vLog('notice', $sRequete);
         $rLien = $this->rConnexion->query($sRequete);
 
         if (!$rLien) {
@@ -1036,6 +1036,8 @@ class Bdd  extends UndeadBrain
 
             $this->sLog .= "- Insertion car absente\n";
             $this->sLog .= "----> $sRequete\n";
+
+            $this->vLog('notice', $sRequete);
 
             $rLien = $this->rConnexion->query($sRequete);
 
@@ -1085,6 +1087,7 @@ class Bdd  extends UndeadBrain
         $this->sLog .= "==============================\n";
         $this->sLog .= "- Ligne existe ?\n";
         $this->sLog .= "----> $sRequete\n";
+        $this->vLog('notice', $sRequete);
         $aElement = $this->aSelectBDD($sRequete);
 
         $aRetour['bExiste'] = empty($aElement) === false;
