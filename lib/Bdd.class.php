@@ -1171,7 +1171,7 @@ class Bdd  extends UndeadBrain
      */
     protected function sConcat($aChaine)
     {
-        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
+        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true && $GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
             // SQLite
             $aChaine = array_map(function($sChaine) 
             {
