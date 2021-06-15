@@ -1087,7 +1087,7 @@ class Bdd  extends UndeadBrain
         $this->sLog .= "==============================\n";
         $this->sLog .= "- Ligne existe ?\n";
         $this->sLog .= "----> $sRequete\n";
-        $this->vLog('notice', $sRequete);
+        // $this->vLog('notice', $sRequete);
         $aElement = $this->aSelectBDD($sRequete);
 
         $aRetour['bExiste'] = empty($aElement) === false;
@@ -1211,13 +1211,17 @@ class Bdd  extends UndeadBrain
      * Démarrage du process
      * @return void
      */
-    public function bDemarreProcess()
+    public function bDemarreProcess($rConnexion = null)
     {
+        if (is_null($rConnexion) === true) {
+            $rConnexion = $this->rConnexion;
+        }
+
         if ($this->bSansAnnulationProcess === false) {
             if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $this->rConnexion->query('BEGIN TRANSACTION;');
+                $rConnexion->query('BEGIN TRANSACTION;');
             } else {
-                $this->rConnexion->beginTransaction();
+                $rConnexion->beginTransaction();
             }
         }
     }
@@ -1226,13 +1230,17 @@ class Bdd  extends UndeadBrain
      * Annulation du process.
      * @return void
      */
-    public function bAnnuleProcess()
+    public function bAnnuleProcess($rConnexion = null)
     {
+        if (is_null($rConnexion) === true) {
+            $rConnexion = $this->rConnexion;
+        }
+
         if ($this->bSansAnnulationProcess === false) {
             if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $this->rConnexion->query('ROLLBACK;');
+                $rConnexion->query('ROLLBACK;');
             } else {
-                $this->rConnexion->rollBack();
+                $rConnexion->rollBack();
             }
         }
     }
@@ -1241,13 +1249,17 @@ class Bdd  extends UndeadBrain
      * Validation du process.
      * @return void
      */
-    public function bValideProcess()
+    public function bValideProcess($rConnexion = null)
     {
+        if (is_null($rConnexion) === true) {
+            $rConnexion = $this->rConnexion;
+        }
+
         if ($this->bSansAnnulationProcess === false) {
             if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $this->rConnexion->query('COMMIT;');
+                $rConnexion->query('COMMIT;');
             } else {
-                $this->rConnexion->commit();
+                $rConnexion->commit();
             }
         }
     }

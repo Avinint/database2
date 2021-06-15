@@ -1,4 +1,6 @@
-# Version courante : 1.1.2
+# Version courante : 1.1.3
+
+* **v1.1.3 : Ajout de la possibilité de passer un alias de connexion aux méthodes de transactions.**
 
 * **v1.1.2 : Ajout de logs dans des méthodes de Bdd.**
 
