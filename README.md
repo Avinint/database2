@@ -1,4 +1,6 @@
-# Version courante : 1.1.3
+# Version courante : 1.2.0
+
+* **v1.2.0 : Utilisation de fetch par ligne au lieu de fetchAll dans le aSelectBdd pour éviter de copier deux fois les données des lignes**
 
 * **v1.1.3 : Ajout de la possibilité de passer un alias de connexion aux méthodes de transactions.**
 

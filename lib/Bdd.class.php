@@ -198,11 +198,9 @@ class Bdd  extends UndeadBrain
         $rLien = $this->$sAliasConnexion->query($szRequete);
 
         if ($rLien) {
-            $aResult = $rLien->fetchAll(\PDO::FETCH_OBJ);
-
             // echo '<pre>'.print_r($aResult, true).'</pre>';
 
-            foreach( $aResult as $objRow )
+            while($objRow = $rLien->fetch(\PDO::FETCH_OBJ))
             {
                 if (is_array($aMappingChamps) && count($aMappingChamps)) {
                     $objResultat = new \StdClass();
