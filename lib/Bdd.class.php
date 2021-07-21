@@ -63,7 +63,7 @@ class Bdd  extends UndeadBrain
     public function bRessourceLogsPresente()
     {
         if (!isset(self::$bPresenceRessourceLogs)) {
-            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']);
+            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']) || in_array('logs', $GLOBALS['aParamsAppli']['modules']);
         }
         return self::$bPresenceRessourceLogs;
     }

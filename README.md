@@ -1,4 +1,6 @@
-# Version courante : 1.1.3
+# Version courante : 1.1.4
+
+* **v1.1.4 : modification de la méthode bRessourceLogsPresente.**
 
 * **v1.1.3 : Ajout de la possibilité de passer un alias de connexion aux méthodes de transactions.**
 
