@@ -1,4 +1,4 @@
-version: 1.1.4
+version: 1.1.41
 
 hote:           localhost
 base:           framework
@@ -7,7 +7,7 @@ mot_de_passe:   root
 
 aNamespace:
     HTML: []
-    data: 
+    data:
       BaseAdminAction:   APP\Modules\Base\Controllers\BaseAdminAction
       Bdd:   APP\Modules\Base\Lib\Bdd
 
