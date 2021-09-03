@@ -989,6 +989,10 @@ class Bdd  extends UndeadBrain
     {
         $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
 
+        if (isset($aLigneExiste['aChamps']) === false || empty($aLigneExiste['aChamps']) === true) {
+            return true;
+        }
+
         if ($aLigneExiste['bExiste'] === false) {
             $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
             $this->sLog .= "- Insertion car absente\n";

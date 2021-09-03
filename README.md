@@ -1,4 +1,6 @@
-# Version courante : 1.1.4
+# Version courante : 1.1.42
+
+* **v1.1.42 : Ne pas exécuter le update/insert du bInsertionLigneOuMiseAJourSiExiste si aChamps vide.**
 
 * **v1.1.41 : suppression d'une balise php fermante.**
 
