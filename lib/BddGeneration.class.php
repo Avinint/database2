@@ -44,7 +44,7 @@ class BddGeneration
                 }
                 $this->objConnexion->query('SET NAMES \''.str_replace('-', '', $GLOBALS['aParamsAppli']['encodage']).'\';');
             }
-            
+
         }
         catch( PDOException $e )
         {
@@ -246,5 +246,3 @@ class BddGeneration
         return $bRetour;
     }
 }
-
-?>

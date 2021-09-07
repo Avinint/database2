@@ -63,7 +63,7 @@ class Bdd  extends UndeadBrain
     public function bRessourceLogsPresente()
     {
         if (!isset(self::$bPresenceRessourceLogs)) {
-            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']);
+            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']) || in_array('logs', $GLOBALS['aParamsAppli']['modules']);
         }
         return self::$bPresenceRessourceLogs;
     }
@@ -987,6 +987,10 @@ class Bdd  extends UndeadBrain
     {
         $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
 
+        if (isset($aLigneExiste['aChamps']) === false || empty($aLigneExiste['aChamps']) === true) {
+            return true;
+        }
+
         if ($aLigneExiste['bExiste'] === false) {
             $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
             $this->sLog .= "- Insertion car absente\n";
@@ -996,7 +1000,9 @@ class Bdd  extends UndeadBrain
             $this->sLog .= "- Mise à jour car présente\n";
             $this->sLog .= "----> $sRequete\n";
         }
-        $this->vLog('notice', $sRequete);
+        if (isset($GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate']) === true && $GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate'] === true) {
+            $this->vLog('notice', $sRequete);
+        }
         $rLien = $this->rConnexion->query($sRequete);
 
         if (!$rLien) {

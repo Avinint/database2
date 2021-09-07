@@ -2,6 +2,14 @@
 
 * **v1.2.0 : Utilisation de fetch par ligne au lieu de fetchAll dans le aSelectBdd pour éviter de copier deux fois les données des lignes**
 
+* **v1.1.43 : Loguer les requêtes INSERT ou UPDATE que si demandé dans la conf du projet.**
+
+* **v1.1.42 : Ne pas exécuter le update/insert du bInsertionLigneOuMiseAJourSiExiste si aChamps vide.**
+
+* **v1.1.41 : suppression d'une balise php fermante.**
+
+* **v1.1.4 : modification de la méthode bRessourceLogsPresente.**
+
 * **v1.1.3 : Ajout de la possibilité de passer un alias de connexion aux méthodes de transactions.**
 
 * **v1.1.2 : Ajout de logs dans des méthodes de Bdd.**
@@ -111,7 +119,7 @@ Nécessite un coeur en v2.4.4 minimum.
 
 * **v1.0.5 : Ajout du tri (ORDER BY) dans les paramètres de la méthode qui effectue une requête pour dynamiser le select2**
 Ajout d'un paramètre sOrderBy à la méthode 'aGetSelect2JSON', pour effectuer un tri personnaliser dans la requête qui
-récupére les datas en vue de la dynamisation d'un select2. Si sOrderBy n'est pas défini, c'est la valeur 'aChamps[1]' qui est 
+récupére les datas en vue de la dynamisation d'un select2. Si sOrderBy n'est pas défini, c'est la valeur 'aChamps[1]' qui est
 utilisé à la place
 
 * **v1.0.4 : Ajout d'un paramètre bMore dans la méthode aGetSelect2JSONResearch permettant de n'afficher que les n premiers éléments**
