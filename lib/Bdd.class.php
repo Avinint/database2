@@ -1002,7 +1002,9 @@ class Bdd  extends UndeadBrain
             $this->sLog .= "- Mise à jour car présente\n";
             $this->sLog .= "----> $sRequete\n";
         }
-        $this->vLog('notice', $sRequete);
+        if (isset($GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate']) === true && $GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate'] === true) {
+            $this->vLog('notice', $sRequete);
+        }
         $rLien = $this->rConnexion->query($sRequete);
 
         if (!$rLien) {

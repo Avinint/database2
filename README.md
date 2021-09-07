@@ -1,4 +1,6 @@
-# Version courante : 1.1.42
+# Version courante : 1.1.43
+
+* **v1.1.43 : Loguer les requêtes INSERT ou UPDATE que si demandé dans la conf du projet.**
 
 * **v1.1.42 : Ne pas exécuter le update/insert du bInsertionLigneOuMiseAJourSiExiste si aChamps vide.**
 
