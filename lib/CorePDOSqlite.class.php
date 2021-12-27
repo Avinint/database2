@@ -86,4 +86,81 @@ class CorePDOSqlite extends \PDO
     //     }
 
     }
+
+    /**
+     * Conversion de date pour inclure dans une
+     * requête SQL via MySQL ou SQLite.
+     * @param  string $sDate   Date à utiliser.
+     * @param  string $sFormat Format de la date au final.
+     * @return string          Chaine à inclure dans le SQL.
+     */
+    public function sDateFormat($sDate, $sFormat)
+    {
+        if (!preg_match('/\./', $sDate)) {
+            $sDate = "'" . $sDate . "'";
+        }
+
+        $sFormat = str_replace(['%i', '\h'], ['%M', 'h'], $sFormat);
+
+        return 'strftime("' . $sFormat . '", ' . $sDate . ')';
+    }
+
+    /**
+     * Retourne la fonction de base de données
+     * récupérant le datetime courant.
+     *
+     * @return string Fonction.
+     */
+    public function sDatetimeCourant()
+    {
+        return 'datetime(\'now\')';
+    }
+
+    /**
+     * Concatène des chaines pour inclure dans une
+     * requête SQL via SQLite.
+     * @param  array $aChaine Chaines à concaténer.
+     * @return string         Chaine à inclure dans le SQL.
+     */
+    public function sConcat($aChaine)
+    {
+        $aChaine = array_map(function($sChaine)
+        {
+            if (preg_match('/strftime|\./', $sChaine)) {
+                return $sChaine;
+            } else {
+                return "'" . $sChaine . "'";
+            }
+        }, $aChaine);
+
+        return implode(" || ", $aChaine);
+
+    }
+
+    /**
+     * Démarrage du process
+     * @return void
+     */
+    public function bDemarreProcess()
+    {
+        $this->query('BEGIN TRANSACTION;');
+    }
+
+    /**
+     * Annulation du process.
+     * @return void
+     */
+    public function bAnnuleProcess()
+    {
+        $this->query('ROLLBACK;');
+    }
+
+    /**
+     * Validation du process.
+     * @return void
+     */
+    public function bValideProcess()
+    {
+        $this->query('COMMIT;');
+    }
 }

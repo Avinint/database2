@@ -1,19 +1,22 @@
 <?php
 
 namespace APP\Modules\Base\Lib;
-use APP\Core\Lib\Interne\PHP\UndeadBrain as UndeadBrain;
-use APP\Modules\Base\Lib\CorePDO as CorePDO;
-use APP\Modules\Base\Lib\CorePDOSqlite;
-use APP\Core\Lib\Interne\PHP\Utiles as Utiles;
+use APP\Core\Lib\Interne\PHP\UndeadBrain;
+use APP\Core\Lib\Interne\PHP\Utiles;
+use APP\Modules\Base\Lib\Champ\Champ;
+use APP\Modules\Base\Lib\Recherche\Recherche;
+use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 
-class Bdd  extends UndeadBrain
+class Bdd extends UndeadBrain
 {
     /**
      * Ressource de la connexion
-     * @var object
+     * @var CorePDO
      */
     public $rConnexion;
     public $szVersion;
+
+    protected Recherche $oRecherche;
 
     private static $aConnexionStatic = array();
 
@@ -25,10 +28,10 @@ class Bdd  extends UndeadBrain
 
     public $sMessagePDO;
     public $sRequeteErreur;
-    
+
     public $aTitreLibelle;
 
-    /** 
+    /**
      * Nom de la table (Utilisé dans bInsert, bUpdate et bDelete)
      * @var string
      */
@@ -37,7 +40,10 @@ class Bdd  extends UndeadBrain
     public $sLog;
 
     private static $bPresenceRessourceLogs;
+
     public $bSansAnnulationProcess = false;
+
+    private $bIsOracle;
 
     /**
      * Constructeur de la classe
@@ -46,36 +52,31 @@ class Bdd  extends UndeadBrain
      */
     public function __construct()
     {
-        $this->sMessagePDO = '';
-        $this->bSansAnnulationProcess = false;
 
+        $this->sMessagePDO = '';
+
+        $this->bIsOracle = $GLOBALS['aParamsBdd']['oracle'] ?? false;
         // echo ' bdd ';
         // echo '-------- avant <pre>'.print_r($this->rConnexion, true).'</pre>';
         if (isset($this->rConnexion) === false) {
             $this->vConnexionBdd();
         }
 
-        $this->sNomTable = "";
-        $this->sNomChampIdBdd = "";
+
+        if (empty($this->sAlias)) {
+            $this->sAlias = substr($this->sNomTable,  0, 3);
+        }
+
         $this->sLog = '';
     }
 
     public function bRessourceLogsPresente()
     {
         if (!isset(self::$bPresenceRessourceLogs)) {
-            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']) || in_array('logs', $GLOBALS['aParamsAppli']['modules']);
+            self::$bPresenceRessourceLogs = isset($GLOBALS['aParamsAppli']['modules']['logs']);
         }
         return self::$bPresenceRessourceLogs;
     }
-
-
-    /**
-     * Méthode permettant de se connecter à la base de données.
-     *
-     *
-     *
-     * @return void
-     */
 
     /**
      * Méthode permettant de se connecter à la base de données..
@@ -111,10 +112,9 @@ class Bdd  extends UndeadBrain
                     $sMotDePasse = $GLOBALS['aParamsBdd']['mot_de_passe'];
                 }
                 if ($sEncodage == '' && isset($GLOBALS['aParamsBdd']['encodage']) === true) {
-
                     $sEncodage = $GLOBALS['aParamsAppli']['encodage'];
-
                 }
+
             } else {
                 $bSqlite = true;
                 if ($sHote == '') {
@@ -122,24 +122,43 @@ class Bdd  extends UndeadBrain
                 }
             }
 
-
             // echo '<pre>'.print_r($GLOBALS['aParamsBdd'], true).'</pre>';
             try
             {
                 if ($bSqlite === true)
                 {
-                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDOSqlite('sqlite:'.$sHote);
-                } 
-                else
-                {
-                    self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
-                    // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
-                    // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
-                    // paramètrage de l'encodage en UTF-8
-
-                    self::$aConnexionStatic[$sAliasConnexion]->query('SET NAMES \''.str_replace('-', '', $sEncodage).'\';');
-                    self::$aConnexionStatic[$sAliasConnexion]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    self::$aConnexionStatic[$sAliasConnexion] = new CorePDOSqlite('sqlite:'.$sHote);
                 }
+//                elseif ($GLOBALS['aParamsBdd']['oracle'])
+//                {
+//                    self::$aConnexionStatic[$sAliasConnexion] = oci_connect($sUtilisateur, $sMotDePasse, $sHote, $sEncodage);
+//
+//                    if (!self::$aConnexionStatic[$sAliasConnexion]) {
+//                        $e = oci_error();
+//                        $sErreur = 'Impossible de se connecter à la base de données : '. htmlentities($e['message'], ENT_QUOTES);
+//                        throw new \PDOException($sErreur,E_USER_ERROR);
+//                        trigger_error($sErreur, E_USER_ERROR);
+//                    }
+//                }
+                elseif ($this->bIsOracle) {
+                    $szBase = 'oci:dbname=//' . $sHote . '/' . $sNomBase . ';charset=al32utf8';
+                    self::$aConnexionStatic[$sAliasConnexion] = new CorePDOOracle($szBase, $sUtilisateur, $sMotDePasse);
+                } else {
+                    $szBase = 'mysql:host=' . $sHote . ';dbname=' . $sNomBase . ';charset=utf8';
+                    self::$aConnexionStatic[$sAliasConnexion] = new CorePDO($szBase, $sUtilisateur, $sMotDePasse);
+//                    self::$aConnexionStatic[$sAliasConnexion]->query('SET NAMES \'' . str_replace('-', '', $sEncodage) . '\';');
+
+                }
+
+
+                /* avant pdo_oci */
+                //  self::$aConnexionStatic[$sAliasConnexion] = new \APP\Modules\Base\Lib\CorePDO('mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse);
+
+                // echo 'mysql:host='.$sHote.';dbname='.$sNomBase, $sUtilisateur, $sMotDePasse."<br/>\n";
+                // echo 'mysql:host='.$GLOBALS['aParamsBdd']['hote'].';dbname='.$GLOBALS['aParamsBdd']['base'], $GLOBALS['aParamsBdd']['utilisateur'], $GLOBALS['aParamsBdd']['mot_de_passe'];
+                // paramètrage de l'encodage en UTF-8
+
+                self::$aConnexionStatic[$sAliasConnexion]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
                 // echo '-------- après <pre>'.print_r($this->rConnexion, true).'</pre>';
             }
@@ -150,8 +169,12 @@ class Bdd  extends UndeadBrain
             }
         }
         $this->$sAliasConnexion = self::$aConnexionStatic[$sAliasConnexion];
+
+        Champ::$rConnexion = $this->$sAliasConnexion;
+
         $GLOBALS[$sAliasConnexion.'BDD'] = $this->$sAliasConnexion;
     }
+
 
 
     /**
@@ -165,102 +188,11 @@ class Bdd  extends UndeadBrain
      */
     public function aSelectBDD($szRequete, $aMappingChamps = array(), $bNoCache = false, $sAliasConnexion = 'rConnexion')
     {
-        $aResultat = array();
-
-        // $bNoCache = false;
-        if ($bNoCache === false) {
-            if ((isset($GLOBALS['aParamsAppli']['cache']['base']) === false ||
-                    $GLOBALS['aParamsAppli']['cache']['base'] == 'non') ||
-                    isset($_REQUEST['bNoCache']) === true ||
-                    isset($_REQUEST['szIdBloc']) === true && $GLOBALS['aModules'][$_REQUEST['szModule']]['blocs'][$_REQUEST['szIdBloc']]['cache']['html'] == 'non') {
-                $bNoCache = true;
-            }
-        }
-
-        if ($bNoCache === false) {
-
-            // $objMemCache = new \Memcache;
-            // $objMemCache->connect($GLOBALS['aParamsAppli']['memcache']['serveur'], $GLOBALS['aParamsAppli']['memcache']['port']) or die ('Could not connect');
-            
-            $objMemCache = $this->oGetMemcache();
-
-            $szCle = md5($szRequete);
-
-            $aRetour = $objMemCache->get($szCle);
-            // echo '$szCle : <pre>'.print_r($aRetour, true).'</pre>';
-            // echo 'cache BDD'.PHP_EOL;
-            if ($aRetour != '') {
-                return $aRetour;
-            }
-        }
-
-        // echo '<pre>'.$szRequete.'</pre>';
-        $rLien = $this->$sAliasConnexion->query($szRequete);
-
-        if ($rLien) {
-            // echo '<pre>'.print_r($aResult, true).'</pre>';
-
-            while($objRow = $rLien->fetch(\PDO::FETCH_OBJ))
-            {
-                if (is_array($aMappingChamps) && count($aMappingChamps)) {
-                    $objResultat = new \StdClass();
-
-                    foreach ($objRow as $szCleLigne => $szValeur) {
-                        if (isset($aMappingChamps[$szCleLigne])) {
-                            $szCleObjet = $aMappingChamps[$szCleLigne];
-                        } else {
-                            $szCleObjet = $szCleLigne;
-                        }
-                        $objResultat->$szCleObjet = $szValeur;
-                    }
-                    if ($this->aTitreLibelle) {
-                        $sTitreLibelle = "";
-                        foreach ($this->aTitreLibelle as $sNomChamp) {
-                            if (isset($objRow->$sNomChamp) === true) {
-                                $sTitreLibelle .= $objRow->$sNomChamp." ";
-                            }
-                        }
-                        if ($sTitreLibelle != '') {
-                            $objResultat->sTitreLibelle = trim($sTitreLibelle);
-                        }
-                    }
-
-                    $aResultat[] = $objResultat;
-                } else {
-                    $aResultat[] = $objRow;
-                }
-            // echo '<pre>'.print_r($objRow, true).'</pre>';
-            }
-            // echo '<pre>'.print_r($aResultat, true).'</pre>';
-        }
-// echo $szCle.' : mise en cache'.PHP_EOL;
-        if ($bNoCache === false) {
-            $objMemCache->set($szCle, $aResultat, MEMCACHE_COMPRESSED, 1200);
-        }
-
-        return $aResultat;
+        return $this->$sAliasConnexion->aSelectBDD($szRequete, $aMappingChamps, $bNoCache);
     }
-
-    public function szGetBonType($szType, $bObjet=false)
-    {
-        $szType = str_replace($GLOBALS['aParamsAppli']['AppId'].'_', '', $szType);
-        if (in_array($szType, array_flip($GLOBALS['aParamsAppli']['namespaces']['data']))) {
-            if ($bObjet == true) {
-                $szType = '\\'.$GLOBALS['aParamsAppli']['namespaces']['data'][$szType];
-            } else {
-                $szType;
-            }
-
-        } else {
-            $szType;
-        }
-
-        return $szType;
-    }
-
 
     /**
-     * Convertie les critères d'un champ sous forme de tableau en chaine.
+     * Convertit les critères d'un champ sous forme de tableau en chaine.
      *
      * @param  array  $aRegles Règles du champ.
      * @return string          Règle du champ.
@@ -284,6 +216,51 @@ class Bdd  extends UndeadBrain
         return $szRegle;
     }
 
+    /**
+     * Initialise un RequeteBuilder avec des paramètres de requète basiques (
+     * @param $bModeCount
+     * @param $sGroupBy
+     * @param $szOrderBy
+     * @param $nStart
+     * @param $nNbElements
+     * @return RequeteBuilderInterface
+     */
+    public function oConstruireRequete($bModeCount = false, $sGroupBy = '', $szOrderBy = '') : RequeteBuilderInterface
+    {
+        $oRequete = $this->oGetRequeteBuilder();
+
+        if ($bModeCount) {
+            $oRequete
+                ->oSelectCount();
+
+        } else {
+            $oRequete
+                ->oGroupBy($sGroupBy)
+                ->oOrderBy($szOrderBy);
+        }
+
+        return $oRequete;
+    }
+
+    /** Initialise un générateur de requêtes avec les paramètres du modèles et du type de connexion BDD
+     * @return RequeteBuilderInterface
+     */
+    protected function oGetRequeteBuilder() : RequeteBuilderInterface
+    {
+        $cRequeteBuilder = $this->rConnexion->cTypeRequeteBuilder;
+
+        return new $cRequeteBuilder($this->aMappingChamps);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function szGetCriteresRecherche($aRecherche = [], $sContexte = [])
+    {
+        $this->oRecherche->vAjouterCriteresRecherche($aRecherche, $sContexte);
+
+        return $this->oRecherche->sGetTexte();
+    }
 
     /**
      * Récupère les éléments en fonction des critères de recherche
@@ -298,17 +275,8 @@ class Bdd  extends UndeadBrain
      */
     public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '', $szContexte = '')
     {
-
-        if ($nStart == '') {
-            $nStart = 0;
-        }
-
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy, $szContexte);
-
-        if ($nNbElements && $nNbElements != 0) {
-            $szRequete .= ' LIMIT '.$nStart.', '.$nNbElements;
-        }
-
+//        $szRequete = $this->sPaginerRequete($nNbElements, $nStart, $szRequete);
         // echo '<pre>'.$szRequete.'</pre>';
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
@@ -319,11 +287,22 @@ class Bdd  extends UndeadBrain
             $this->sRequeteErreur = $this->rConnexion->sRequeteErreur;
         }
 
-        // echo '<pre>'.print_r($aResultats, true).'</pre>';
+        if ($this->aTitreLibelle) {
+            foreach ($aResultats as $sCle => $oUneLigne) {
+                $sTitreLibelle = "";
+                foreach ($this->aTitreLibelle as $sNomChamp) {
+                    if (isset($oUneLigne->$sNomChamp) === true) {
+                        $sTitreLibelle .= $oUneLigne->$sNomChamp." ";
+                    }
+                }
+                if ($sTitreLibelle != '') {
+                    $aResultats[$sCle]->sTitreLibelle = trim($sTitreLibelle);
+                }
+            }
+        }
 
-        return $aResultats;
+        return  $aResultats;
     }
-
 
     /**
      * Connaître le nombre d'éléments.
@@ -336,17 +315,34 @@ class Bdd  extends UndeadBrain
     {
         $nRetour = 0;
 
-        $szRequete = $this->szGetSelect($aRecherche, '', true, '', '', $szGroupBy, $szContexte);
+
+        $szRequete = $this->szGetSelect($aRecherche, '', true, 0, 0, $szGroupBy, $szContexte);
+
+
 
         // echo '<pre>'.$szRequete.'</pre>';
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
+
+
 
         if (isset($aResultats[0]->nNbElements) === true) {
             $nRetour = $aResultats[0]->nNbElements;
         }
 
         return $nRetour;
+    }
+
+    /**
+     * Limite les lignes qui sont affichées
+     * @param $nNbElements
+     * @param $nStart
+     * @param $szRequete
+     * @return string
+     */
+    protected function sPaginerRequete($nNbElements, $nStart, $szRequete)
+    {
+        return $this->rConnexion->sPaginerRequete($nNbElements, $nStart, $szRequete);
     }
 
     public function aListeTables()
@@ -357,91 +353,7 @@ class Bdd  extends UndeadBrain
             $this->vConnexionBdd();
         }
 
-        $sRequete = "SHOW FULL tables FROM `".$GLOBALS['aParamsBdd']['base']."`  where Table_Type != 'VIEW'";
-
-        $aResultats = $this->aSelectBDD($sRequete);
-
-        foreach ($aResultats as $nIndex => $oTable) {
-
-            $sCle = 'Tables_in_'.$GLOBALS['aParamsBdd']['base'];
-
-            $aTables[$oTable->$sCle] = array();
-
-            $sRequete = "SHOW columns FROM ".$oTable->$sCle;
-
-            $aResultats = $this->aSelectBDD($sRequete);
-
-            foreach ($aResultats as $nIndex => $oChamp) {
-
-                $aType = explode('(', $oChamp->Type);
-                $sType = array_shift($aType);
-                $sMaxLength = array_shift($aType);
-
-                $aNom = explode('_', $oChamp->Field);
-                $aNom = array_map('ucfirst', $aNom);
-                $sNom = implode('', $aNom);
-
-                $oChamp->sType = $sType;
-
-                switch ($sType) {
-                    case 'int':
-                    case 'tinyint':
-                    case 'smallint':
-                        $oChamp->sChamp = 'n'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'varchar':
-                    case 'text':
-                    case 'mediumtext':
-                    case 'longtext':
-                        $oChamp->sChamp = 's'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    case 'enum':
-                        $oChamp->sChamp = 's'.$sNom;
-                        break;
-
-                    case 'datetime':
-                        $oChamp->sChamp = 'dt'.$sNom;
-                        break;
-
-                    case 'time':
-                        $oChamp->sChamp = 't'.$sNom;
-                        break;
-
-                    case 'date':
-                        $oChamp->sChamp = 'd'.$sNom;
-                        break;
-                        
-                    case 'decimal':
-                    case 'float':
-                    case 'double':
-                        $oChamp->sChamp = 'f'.$sNom;
-                        if ($sMaxLength != '') {
-                            $oChamp->nMaxLength = str_replace(')', '', $sMaxLength);
-                        }
-                        break;
-
-                    default:
-                        # code...
-                        break;
-                }
-
-                $aTables[$oTable->$sCle][$oChamp->Field] = $oChamp;
-            }
-
-        }
-
-        // echo "<pre>".print_r($aTables, true)."</pre>";
-
-        return $aTables;
-
+        return $this->rConnexion->aListeTables();
     }
 
 
@@ -467,7 +379,6 @@ class Bdd  extends UndeadBrain
 
             $aTablesTemp = \Spyc::YAMLLoad($szFichierModule);
             $aTables = array_merge($aTables, $aTablesTemp);
-
         }
 
         // echo '<pre>'.print_r($aTables, true).'</pre>';
@@ -499,9 +410,6 @@ class Bdd  extends UndeadBrain
                 foreach ($aTables[$szTable]['champs'] as $szChamp => $aParamsChamps) {
                     $aParamsChamps['nom_champ'] = $szChamp;
                     // echo '<pre>'.print_r($aParamsChamps, true).'</pre>';
-
-
-
                 }
                 // echo '<pre>'.print_r($oTable, true).'</pre>';
             }
@@ -512,7 +420,7 @@ class Bdd  extends UndeadBrain
 
     /**
      * Vérifie qu'une valeur d'un champ devant rester unique n'a pas déjà été choisie.
-     *
+     * @oracle
      * @param  string $szTable  Table concernée.
      * @param  string $szChamp  Champ à vérifier.
      * @param  string $szValeur Valeur à trouver.
@@ -521,212 +429,240 @@ class Bdd  extends UndeadBrain
      */
     public function bChampUniqueDejaUtilise($szTable = '', $szChamp = '', $szValeur = '')
     {
-        $bRetour = true;
-
-        $szRequete = '
-            SELECT COUNT(*) AS nNbElements
-            FROM '.$szTable.'
-            WHERE '.$szChamp.' LIKE \''.$szValeur.'\'
-        ';
-
-        // echo "$szRequete";
-
-        $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
-
-        if (isset($aResultats[0]) === true) {
-            if ($aResultats[0]->nNbElements == 0) {
-                $bRetour = false;
-            }
-        }
-
-        return $bRetour;
+        return $this->rConnexion->bChampUniqueDejaUtilise($szTable, $szChamp, $szValeur, $this->aMappingChamps);
     }
 
     /**
      * Requête de selection pour dynamiser un select2
+     * @oracle
      *
      * @param array $aRecherche     Critères de recherche
-     * @param array $aChamps        Champs sur lesquelles effectuer la recherche             
+     * @param array $aChamps        Champs sur lesquelles effectuer la recherche
      * @param string $sTable        Table sur laquelle effectuer la recherche
      * @param string $sRestriction  Restriction venant compléter les critères de recherche
      *
      * @return array $aResultats    Tableau de résultats
      */
-	public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '', $sRestriction = '')
-	{
-        if ($sOrderBy == '') {
-            $sOrderBy = $aChamps[1];
-        }
-        $szRequete = "
-
-			SELECT ".$aChamps[0]." AS id, ".$aChamps[1]." AS text
-			FROM ".$sTable."
-            WHERE 1=1 AND (replace(".$aChamps[1].",'-', ' ') LIKE '%" . addslashes($aRecherche['sTerm']) . "%' OR replace(".$aChamps[1].",' ', '-') LIKE '%" . addslashes($aRecherche['sTerm']) . "%') ".$sRestriction."
-			ORDER BY ".$sOrderBy." ASC
-        ";
-        // echo $szRequete."\r\n";
-		$aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
-
-        return $aResultats;
-	}
+    public function aGetSelect2JSON($aRecherche = array(), $aChamps = array(), $sTable = '', $sOrderBy = '', $sRestriction = '')
+    {
+        return $this->rConnexion->aGetSelect2JSON($aRecherche, $aChamps, $sTable, $sOrderBy, $sRestriction);
+    }
 
 
     /**
      * Formate les champs de la requête d'insert/update
      * afin d'en retourner une chaine pour le SET.
-     * 
+     *
      * @param  array  $aChamps Champs concernés par l'édition.
-     * 
+     *
      * @return string          Fragment de requête formaté.
      */
-    protected function sFormateChampsRequeteEdition($aChamps = array(), $aChampsNull = array())
-    {
-        $sRequete = '';
-
-        $aLignes = array();
-        foreach ($aChamps as $sUnChamp => $sUneValeur) {
-            $aLignes[] = " ".$sUnChamp." = '".addslashes($sUneValeur)."'";
-        }
-        if ($aChampsNull) {
-            foreach ($aChampsNull as $sUnChamp) {
-                $aLignes[] = " ".$sUnChamp." = NULL";
-            }
-        }
-
-        $sRequete .= implode(', ', $aLignes);
-
-        return $sRequete;
-    }
+//    protected function sFormateChampsRequeteEdition($aChamps = array(), $aChampsNull = array())
+//    {
+//        $sRequete = '';
+//
+//        $aLignes = array();
+//        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+//            $aLignes[] = " ".$sUnChamp." = '". $this->sEchappe($sUneValeur) ."'";
+//        }
+//        if ($aChampsNull) {
+//            foreach ($aChampsNull as $sUnChamp) {
+//                $aLignes[] = " ".$sUnChamp." = NULL";
+//            }
+//        }
+//
+//        $sRequete .= implode(', ', $aLignes);
+//
+//        return $sRequete;
+//    }
 
 
     /**
      * Prépare les champs et la requête placeholder pour une requête
      * préparé
-     * 
-     * @param array $aChamps Champs avec des valeurs non nulles 
+     *
+     * @param array $aChamps Champs avec des valeurs non nulles
      * @param array $aChampsNull Champs avec des valeurs nulles
-     * 
+     *
      * @return array[]
      * @return array['aChampsPrepares'] string[] Les champs préparés
      * @return array['sRequete'] string La partie de la requête avec les placeholders (SET machin = :valeur_machin)
      */
-    protected function aPreparerChampsPlaceHolderRequete($aChamps = array(), $aChampsNull= array())
-    {
-        $aRetour = array(
-            'sRequete' => '',
-            'aChampsPrepare' => array()
-        );
-
-        $aLignes = array();
-        /**
-         * Dans le parcours des champs on prépare
-         * les lignes dans la requête SQL contenant 
-         * les placeholders (:nomchamp) et on prépare en
-         * même temps les valeurs de ces placeholders
-         * qui seront attribué dans le aPreparerRequete
-         */
-        foreach ($aChamps as $sUnChamp => $sUneValeur) {
-            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
-            $aRetour['aChampsPrepare'][":{$sUnChamp}"] = $sUneValeur;
-        }        
-
-
-        if ($aChampsNull) {
-            foreach ($aChampsNull as $sUnChamp) {
-                $aLignes[] = "{$sUnChamp} = NULL";
-            }
-        }
-
-        $aRetour['sRequete'] .= implode(', ', $aLignes);
-
-        return $aRetour;
-    }
+//    protected function aPreparerChampsPlaceHolderRequete($aChamps = array(), $aChampsNull= array())
+//    {
+//        $aRetour = array(
+//            'sRequete' => '',
+//            'aChampsPrepare' => array()
+//        );
+//
+//        $aLignes = array();
+//        /**
+//         * Dans le parcours des champs on prépare
+//         * les lignes dans la requête SQL contenant
+//         * les placeholders (:nomchamp) et on prépare en
+//         * même temps les valeurs de ces placeholders
+//         * qui seront attribué dans le aPreparerRequete
+//         */
+//        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+//            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
+//            $aRetour['aChampsPrepare'][":{$sUnChamp}"] = $sUneValeur;
+//        }
+//
+//
+//        if ($aChampsNull) {
+//            foreach ($aChampsNull as $sUnChamp) {
+//                $aLignes[] = "{$sUnChamp} = NULL";
+//            }
+//        }
+//
+//        $aRetour['sRequete'] = "INSERT INTO {$this->sNomTable} SET " .  implode(', ', $aLignes);
+//
+//        return $aRetour;
+//    }
 
     /**
      * Crée la partie de la requête contenant les placeholders (:nomchamp)
-     * 
-     * @param string[] $aChamps 
-     * 
+     *
+     * @param string[] $aChamps
+     *
      * @return string
      */
-    protected function sPreparerRequetePlaceHolder($aChamps = array(), $aChampsNull= array())
-    {
-        $sRequete = '';
-        $aLignes = array();
-        
-        foreach ($aChamps as $sUnChamp => $sUneValeur) {
-            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
-        }      
-
-        if (is_array($aChampsNull)) {
-            foreach ($aChampsNull as $sUnChamp) {
-                $aLignes[] = "{$sUnChamp} = NULL";
-            }
-        }
-
-        return implode(', ', $aLignes);
-    }
+//    protected function sPreparerRequetePlaceHolder($aChamps = array(), $aChampsNull= array())
+//    {
+//        $sRequete = '';
+//        $aLignes = array();
+//
+//        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+//            $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
+//        }
+//
+//        if (is_array($aChampsNull)) {
+//            foreach ($aChampsNull as $sUnChamp) {
+//                $aLignes[] = "{$sUnChamp} = NULL";
+//            }
+//        }
+//
+//        return implode(', ', $aLignes);
+//    }
 
     /**
      * Prépare les champs pour la requête contenant les placeholders
-     * 
+     *
      * (Attention : il faut que les indexs dans le tableau $aChamps correspondent aux placeholders
      * dans la requête, veillez donc à utiliser le même tableau de champs dans les deux méthodes
      * si vous n'utilisez pas la fonction aPreparerChampsPlaceHolderRequete)
-     * 
+     *
      * @param string[] $aChamps Les champs à préparer : L'index utilisé dans le nouveau tableau sera égale à ":nomdudchamp"
-     * 
+     *
      * @return string[] Les champs préparés
      */
-    protected function aPreparerChampsRequete($aChamps= array())
-    {
-        $sRequete = '';
-        $aChampsPrepare = array();
-        
-        foreach ($aChamps as $sUnChamp => $sUneValeur) {
-            $aChampsPrepare[":{$sUnChamp}"] = $sUneValeur;
-        }
-
-        return $aChampsPrepare;
-    }
+//    protected function aPreparerChampsRequete($aChamps= array())
+//    {
+//        $sRequete = '';
+//        $aChampsPrepare = array();
+//
+//        foreach ($aChamps as $sUnChamp => $sUneValeur) {
+//            $aChampsPrepare[":{$sUnChamp}"] = $sUneValeur;
+//        }
+//
+//        return $aChampsPrepare;
+//    }
 
     /**
      * Prépare la requête avec les placeholders et renvoi un objet PDOStatement
-     * 
+     *
      * @param string $sRequete La première partie de la requête (ex : 'INSERT INTO table SET ')
-     * 
+     *
      * @return \PDOStatement L'objet de PDO pour les requêtes préparées
      */
-    protected function oPreparerRequete($sRequete)
-    {
-        return $this->rConnexion->prepare($sRequete);
-    }
+//    protected function oPreparerRequete($sRequete)
+//    {
+//        return $this->rConnexion->prepare($sRequete);
+//    }
 
     /**
      * Execute la requête par l'objet \PDOStatement
-     * 
+     *
      * C'est cette fonction qu'il faut utiliser si vous souhaitez
      * exécuter la même requête préparé avec des paramètres différents
-     * 
+     *
      * @param \PDOStatement $oRequetePrepare La requête préparé préalablement
      * @param string[] $aChampsPrepare Les champs préparé à utilisé dans la requête
-     * 
+     *
      * @return bool Vrai en cas de succès, faux sinon
      */
-    protected function bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare = array())
+//    protected function bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare = array())
+//    {
+//        $mResultat = false;
+//        try
+//        {
+//            $mResultat = $oRequetePrepare->execute($aChampsPrepare);
+//        }
+//        catch (\PDOException $e) {
+//            $this->vLog('critical', '<pre>'.print_r($oRequetePrepare, true).'</pre>');
+//            $this->vLog('critical', '<pre>'.print_r($aChampsPrepare, true).'</pre>');
+//            // $oUtiles = new Utiles;
+//            // if (method_exists($oUtiles, 'vLogRequete')) {
+//            //     $oUtiles->vLogRequete($szRequete, true);
+//            // }
+//            /**
+//             * Contient les infos sur l'erreur SQL :
+//             * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)
+//             * [1] => Code d'erreur du driver spécifique
+//             * [2] => Message d'erreur spécifique au driver
+//             * @var array $infosErreur
+//             */
+//            $sCodeErreur = $e->getCode();
+//            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+//        } finally {
+//            if (isset($e) === true) {
+//                $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
+//                if ($bExceptionSurContrainte === true) {
+//                    throw $e;
+//                } else {
+//                    switch ($sCodeErreur) {
+//                        // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
+//                        case '23000': // Violation de contrainte d'intégrité
+//                            break;
+//                        default:
+//                            throw $e;
+//                            break;
+//                    }
+//                }
+//            }
+//            return $mResultat;
+//        }
+//
+//    }
+
+    /**
+     * Pour utiliser les méthodes qui vont suivre
+     * vous devez définir deux propriétés dans le modèle correspondant
+     *
+     * sNomTable : Nom de la table
+     * sNomChampIdBdd : Nom du champ en base de données désigné en tant que clé primaire
+     *
+     * Vous devez également indiqué son mapping dans le tableau aMappingChamps (Normalement cela est fait automatiquement par le générateur)
+     */
+
+    /**
+     * Insertion d'un élément dans la bdd
+     *
+     * @param string[] $aChamps Liste des champs non nuls
+     * @param string[] $aChampsNull Liste des champs nuls
+     *
+     * @return bool Vrai si la requête a fonctionné, faux sinon
+     */
+    public function bInsert($aChamps = array(), $aChampsNull = array())
     {
-        $mResultat = false;
-        try
-        {
-            $mResultat = $oRequetePrepare->execute($aChampsPrepare);
-        }
-        catch (\PDOException $e) {
-            $this->vLog('critical', '<pre>'.print_r($oRequetePrepare, true).'</pre>');
-            $this->vLog('critical', '<pre>'.print_r($aChampsPrepare, true).'</pre>');
-            // $oUtiles = new Utiles;
-            // if (method_exists($oUtiles, 'vLogRequete')) {
-            //     $oUtiles->vLogRequete($szRequete, true);
-            // }
+        $bRetour = false;
+
+        $sNomTable = $this->sNomTable();
+        $sNomChampId = $this->sNomChampId();
+
+        try {
+            $bRetour = $this->rConnexion->bInsert($this->aMappingChamps, $aChamps, $aChampsNull);
+        } catch (\PDOException $e) {
             /**
              * Contient les infos sur l'erreur SQL :
              * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)
@@ -734,78 +670,16 @@ class Bdd  extends UndeadBrain
              * [2] => Message d'erreur spécifique au driver
              * @var array $infosErreur
              */
-            $sCodeErreur = $e->getCode();
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+            $nCodeErreur = $e->getCode();
+            $this->vLogErreurRequete();
         } finally {
-            if (isset($e) === true) {
-                $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
-                if ($bExceptionSurContrainte === true) {
-                    throw $e;
-                } else {
-                    switch ($sCodeErreur) {
-                        // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
-                        case '23000': // Violation de contrainte d'intégrité
-                            break;
-                        default:
-                            throw $e;
-                            break;
-                    }
-                }
-            }
-            return $mResultat;
-        }
-        
-    }
-
-    /**
-     * Pour utiliser les méthodes qui vont suivre 
-     * vous devez définir deux propriétés dans le modèle correspondant
-     * 
-     * sNomTable : Nom de la table
-     * sNomChampIdBdd : Nom du champ en base de données désigné en tant que clé primaire
-     * 
-     * Vous devez également indiqué son mapping dans le tableau aMappingChamps (Normalement cela est fait automatiquement par le générateur)
-     */
-
-    /**
-     * Insertion d'un élément dans la bdd
-     * 
-     * @param string[] $aChamps Liste des champs non nuls
-     * @param string[] $aChampsNull Liste des champs nuls
-     * 
-     * @return bool Vrai si la requête a fonctionné, faux sinon
-     */
-    public function bInsert($aChamps = array(), $aChampsNull = array())
-    {
-        $bRetour = false;
-
-        if(empty($this->sNomTable) === true)
-        {
-            throw new \Exception("sNomTable n'a pas été défini pour ce modèle");
+            $this->vGererErreurSurContrainte($e, $nCodeErreur);
         }
 
-        $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($aChamps, $aChampsNull);
+        $this->$sNomChampId = $this->nGetLastInsertId();
 
-        $sRequete = "INSERT INTO {$this->sNomTable} SET " . $aPreparationRequete['sRequete'];
-        
-        $oRequetePrepare = $this->oPreparerRequete($sRequete);
-
-        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
-
-        if($bRetour === false)
-        {
-            $this->vLog('critical', $sRequete);
-            $this->vLog('critical', '<pre>'.print_r($aPreparationRequete['aChampsPrepare'], true).'</pre>');
-            $this->vLog('critical', 'sMessagePDO ----> '.$this->sMessagePDO);
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-        }
-        else
-        {
-            $sNomChampId = $this->sGetNomChampId();
-            $this->$sNomChampId = $this->rConnexion->lastInsertId();
-            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
-                $this->bSetLog("insert_{$this->sNomTable}", $this->$sNomChampId);
-            }
+        if ($bRetour && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
+            $this->bSetLog("insert_{$sNomTable}", $this->$sNomChampId);
         }
 
         return $bRetour;
@@ -813,50 +687,30 @@ class Bdd  extends UndeadBrain
 
     /**
      * Modification d'un élément dans la bdd
-     * 
+     *
      * @param string[] $aChamps Liste des champs non nuls
      * @param string[] $aChampsNull Liste des champs nuls
-     * 
+     *
      * @return bool Vrai si la requête a fonctionné, faux sinon
      */
     public function bUpdate($aChamps = array(), $aChampsNull = array())
     {
-        if(empty($this->sNomTable) === true)
-        {
-            throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
+        $bRetour = false;
+
+        $sNomTable = $this->sNomTable();
+        $sNomChampId = $this->sNomChampId();
+
+        try {
+            $bRetour = $this->rConnexion->bUpdate($this->aMappingChamps, $this->$sNomChampId, $aChamps, $aChampsNull);
+        } catch (\PDOException $e) {
+            $nCodeErreur = $e->getCode();
+            $this->vLogErreurRequete();
+        } finally {
+            $this->vGererErreurSurContrainte($e, $nCodeErreur);
         }
 
-        if(empty($this->sNomCle) === true)
-        {
-            throw new \Exception("sNomCle n'a pas été défini pour le modèle " . get_called_class());
-        }
-
-        $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($aChamps, $aChampsNull);
-
-
-        $sRequete = "UPDATE {$this->sNomTable} SET " . $aPreparationRequete['sRequete']
-                  . " WHERE {$this->sNomCle} = :nIdElement";
-        
-        
-        $oRequetePrepare = $this->oPreparerRequete($sRequete);
-
-        //On récupère le nom du champ contenant la clé primaire par le mapping champs
-        $sNomChampId = $this->sGetNomChampId();
-
-        //On rajoute l'id élement dans les valeurs préparé pour qu'elle remplace le placeholder
-        $aPreparationRequete['aChampsPrepare'][':nIdElement'] = $this->$sNomChampId;
-
-        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
-
-        if($bRetour === false)
-        {
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-        }
-        else
-        {
-            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
-                $this->bSetLog("update_{$this->sNomTable}", $this->$sNomChampId);
-            }
+        if ($bRetour && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
+            $this->bSetLog("update_{$sNomTable}", $this->$sNomChampId);
         }
 
         return $bRetour;
@@ -864,109 +718,151 @@ class Bdd  extends UndeadBrain
 
     /**
      * Suppression d'un élément par son id
-     * 
+     *
      * Pour utiliser cette fonction la proprité
      * sNomChampId doit être défini en plus
      * du nom de la table
-     * 
+     *
      * @return bool Vrai en cas de succès, faux sinon
      */
     public function bDelete()
     {
-        if(empty($this->sNomTable) === true)
-        {
-            throw new \Exception("sNomTable n'a pas été défini pour le modèle " . get_called_class());
+        $bRetour = false;
+        $sNomTable = $this->sNomTable();
+        $sNomChampId = $this->sNomChampId();
+        $sNomCle = $this->sNomCle();
+        try {
+            $bRetour = $this->rConnexion->bDelete($this->$sNomChampId, $sNomTable, $sNomCle);
+        } catch (\PDOException $e) {
+            $nCodeErreur = $e->getCode();
+            $this->vLogErreurRequete();
+        } finally {
+            $this->vGererErreurSurContrainte($e, $nCodeErreur);
         }
 
-        if(empty($this->sNomCle) === true)
-        {
-            throw new \Exception("sNomCle n'a pas été défini pour le modèle " . get_called_class());
-        }
-
-        //Ici pas besoin de générer les champs préparé, on possède uniquement le champ nIdElement
-        //On récupère le nom du champ contenant la clé primaire par le mapping champs
-        $sNomChampId = $this->sGetNomChampId();
-
-        $aChampsPrepare = array(
-            ':nIdElement' => $this->$sNomChampId
-        );
-
-        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomCle} = :nIdElement";
-
-        $oRequetePrepare = $this->oPreparerRequete($sRequete);
-
-        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
-
-        if($bRetour === false)
-        {
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-        }
-        else
-        {
-            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
-                $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
-            }
+        if($bRetour && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
+            $this->bSetLog("delete_{$sNomTable}", $this->$sNomChampId);
         }
 
         return $bRetour;
-    }
 
-    /**
-     * Renvoie le champ mappé sur sNomCle
-     * 
-     * @return string Nom du champ mappé (Ex : nIdTrucMuche)
-     */
-    private function sGetNomChampId(){
-        if(empty($this->aMappingChamps[$this->sNomCle]) === false)
-        {
-            return $this->aMappingChamps[$this->sNomCle];
-        }
-
-        throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
+//
+//        //Ici pas besoin de générer les champs préparé, on possède uniquement le champ nIdElement
+//        //On récupère le nom du champ contenant la clé primaire par le mapping champs
+//        $sNomChampId = $this->sGetNomChampId();
+//
+//        $aChampsPrepare = array(
+//            ':nIdElement' => $this->$sNomChampId
+//        );
+//
+//        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomCle} = :nIdElement";
+//
+//        $oRequetePrepare = $this->oPreparerRequete($sRequete);
+//
+//        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
+//
+//        if($bRetour === false)
+//        {
+//            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+//        }
+//        else
+//        {
+//            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
+//                $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
+//            }
+//        }
+//
+//        return $bRetour;
     }
 
     /**
      * Permet de générer une clause case de BDD pour faire correspondre une valeur à un libellé.
-     * 
+     *
      * @param  string $sNomChamp Nom du champ contenant la valeur.
      * @param  array  $aLibelle  Tableau de correspondance valeur => libellé.
-     * 
+     *
      * @return string            Clause CASE.
      */
     protected function sGetClauseCase($sNomChamp, $aLibelle)
     {
-        $sRequete = '
-            CASE
-                '.$sNomChamp.'
-        ';
-        foreach ($aLibelle as $sValeur => $sLibelle) {
-            $sRequete .= '
-                WHEN
-                    \''.$sValeur.'\'
-                THEN
-                    \''.addslashes($sLibelle).'\'
-            ';
-        }
-        $sRequete .= '
-                ELSE
-                    '.$sNomChamp.'
-            END
-        ';
-        return $sRequete;
+        return $this->rConnexion->sGetClauseCase($sNomChamp, $aLibelle);
     }
 
     /**
      * Renvoie le champ mappé sur le champ
      * @param  string $sNomChamp nom du champ
-     * 
+     *
      * @return string Nom du champ mappé (Ex : nIdTrucMuche)
      */
-    public function sGetNomChamp($sNomChamp = '') {
+    public function sGetNomChamp($sNomChamp = '')
+    {
         $sRetour = '';
         if(isset($this->aMappingChamps[$sNomChamp])) {
             $sRetour = $this->aMappingChamps[$sNomChamp];
         }
         return $sRetour;
+    }
+
+    /**
+     *  Renvoye le nom de la table
+     * @return string
+     */
+    protected function sNomTable() : string
+    {
+        $sNomTable = $this->sNomTable ?? $this->aMappingChamps->sNomTable() ?? '';
+
+        if (empty($sNomTable)) {
+            throw new \Exception("Le nom de la table n'a pas été défini pour le modèle " . get_called_class());
+        }
+
+        return $sNomTable;
+    }
+
+    /**
+     * Renvoie le champ correspondant à la clé primaire
+     *
+     * @return string Nom du champ mappé (Ex : nIdTrucMuche)
+     */
+    protected function sNomChampId() : string
+    {
+        $sNomChampId = $this->sNomChampId ?? $this->aMappingChamps->sNomChampId ?? '';
+
+        if (empty($sNomChampId)) {
+            throw new \Exception("Le champ id - correspondant à la clé primaire -  non défini pour ce modèle");
+        }
+
+        return $sNomChampId;
+    }
+
+    /**
+     * Renvoie le nom de la colonne clé primaire
+     * @return void
+     * @throws \Exception
+     */
+    protected function sNomCle() : string
+    {
+        $sNomCle = $this->sNomCle ?? $this->aMappingChamps->sNomCle ?? '';
+
+        if (empty($sNomCle)) {
+            throw new \Exception("Le nom de la clé primaire n'a pas été définie pour ce modèle");
+        }
+
+        return $sNomCle;
+    }
+
+    /**
+     * Renvoie le nom de la séquence, seulement utile et rensoigné dans les bases oracle, ne pas utiliser avec les autres sgbdr
+     * @return string
+     */
+    protected function sNomSequence() : string
+    {
+        $sNomSequence = $this->aMappingChamps->sNomSequence() ?? '';
+
+        if (empty($sNomSequence)) {
+            throw new \Exception("Les séquences ne doivent pas être utilisées en dehors de Oracle Db");
+        }
+
+        return $sNomSequence;
     }
 
     /**
@@ -977,153 +873,48 @@ class Bdd  extends UndeadBrain
      * @param  string $sContexte
      * @return array
      */
-    public function aRecupereDonneesPdf($aRecherche = array(), $sOrderBy = '', $sGroupBy = '', $sContexte = '') {
-        $aRetour = $this->aGetElements($aRecherche, 0, '', $sOrderBy, $sGroupBy, $sContexte);
-        return $aRetour;
+    public function aRecupereDonneesPdf($aRecherche = array(), $sOrderBy = '', $sGroupBy = '', $sContexte = '')
+    {
+        return $this->rConnexion->aGetElements($aRecherche, 0, '', $sOrderBy, $sGroupBy, $sContexte);
     }
 
 
     public function bInsertionLigneOuMiseAJourSiExiste($sCleSynchro, $oUnElement)
     {
-        $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
-
-        if (isset($aLigneExiste['aChamps']) === false || empty($aLigneExiste['aChamps']) === true) {
-            return true;
-        }
-
-        if ($aLigneExiste['bExiste'] === false) {
-            $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
-            $this->sLog .= "- Insertion car absente\n";
-            $this->sLog .= "----> $sRequete\n";
-        } else {
-            $sRequete = $this->sRequeteSqlUpdateLigne($aLigneExiste);
-            $this->sLog .= "- Mise à jour car présente\n";
-            $this->sLog .= "----> $sRequete\n";
-        }
-        if (isset($GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate']) === true && $GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate'] === true) {
-            $this->vLog('notice', $sRequete);
-        }
-        $rLien = $this->rConnexion->query($sRequete);
-
-        if (!$rLien) {
-            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-            $this->vLog('critical', $sRequete);
-            return false;
-        }
-
-        return true;
+        return $this->rConnexion->bInsertionLigneOuMiseAJourSiExiste($sCleSynchro, $oUnElement);
     }
 
-    protected function sRequeteSqlInsertLigne($aLigneExiste)
-    {
-        return 'INSERT INTO ' . $this->sNomTable . ' (' . implode(', ', $aLigneExiste['aChamps']) . ') '
-                    . 'VALUES(\'' . implode('\', \'', $aLigneExiste['aValeur']) . '\''
-                    . ')';
-    }
+//    protected function sRequeteSqlInsertLigne($aLigneExiste)
+//    {
+//        return $this->rConnexion->sRequeteSqlInsertLigne($aLigneExiste, $this->sNomTable);
+//        return 'INSERT INTO ' . $this->sNomTable . ' (' . implode(', ', $aLigneExiste['aChamps']) . ') '
+//                    . 'VALUES(\'' . implode('\', \'', $aLigneExiste['aValeur']) . '\''
+//                    . ')';
+//    }
 
-    protected function sRequeteSqlUpdateLigne($aLigneExiste)
-    {
-        $sRequete = 'UPDATE ' . $this->sNomTable . ' SET ' . implode(', ', $aLigneExiste['aChamps']) . ' '
-                    . 'WHERE 1 ';
-        foreach ($aLigneExiste['oLigne'] as $sChamp => $sValeur) {
-            $sRequete .= 'AND ' . $sChamp . ' = \'' . addslashes($sValeur) . '\' ';
-        }
-        return $sRequete;
-    }
+//    protected function sRequeteSqlUpdateLigne($aLigneExiste)
+//    {
+//        return $this->rConnexion->sRequeteSqlUpdateLigne($aLigneExiste, $this->sNomTable);
+//        $sRequete = 'UPDATE ' . $this->sNomTable . ' SET ' . implode(', ', $aLigneExiste['aChamps']) . ' '
+//                    . 'WHERE 1 ';
+//        foreach ($aLigneExiste['oLigne'] as $sChamp => $sValeur) {
+//            $sRequete .= 'AND ' . $sChamp . ' = \'' . $this->sEchappe($sValeur) . '\' ';
+//        }
+//        return $sRequete;
+//    }
+
+
 
     public function bInsertionLigneSiAbsente($sCleSynchro, $oUnElement)
     {
-        $aLigneExiste = $this->bLigneExiste($sCleSynchro, $oUnElement);
-
-        if ($aLigneExiste['bExiste'] === false) {
-            $sRequete = $this->sRequeteSqlInsertLigne($aLigneExiste);
-
-            $this->sLog .= "- Insertion car absente\n";
-            $this->sLog .= "----> $sRequete\n";
-
-            $this->vLog('notice', $sRequete);
-
-            $rLien = $this->rConnexion->query($sRequete);
-
-            if (!$rLien) {
-                $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-                $this->vLog('critical', $sRequete);
-                return false;
-            }
-        } else {
-            $this->sLog .= "- On ne fait rien car présente\n";
-        }
-
-        return true;
+        return $this->rConnexion->bInsertionLigneSiAbsente($sCleSynchro, $oUnElement);
     }
 
     public function bLigneExiste($sCleSynchro, $oUnElement)
     {
-        $aRetour = [
-            'bExiste' => false,
-            'aClePrimaire' => [],
-            'aChamps' => [],
-        ];
-        $sClePrimaire = $this->sNomCle;
-        $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
-        $sTable = $this->sNomTable;
+        $mClePrimaire = $this->aClePrimaire ?? $this->sNomCle;
 
-        // On regarde si la ligne existe déjà.
-        $sRequete = 'SELECT ';
-        if (isset($this->aClePrimaire) === true) {
-            $sRequete .= implode(', ', $this->aClePrimaire);
-        } else {
-            $sRequete .= $sClePrimaire;
-        }
-        $sRequete .= ' FROM ' . $this->sNomTable . ' '
-                  . 'WHERE 1 ';
-
-        if (isset($this->aClePrimaire) === true) {
-            foreach ($this->aClePrimaire as $sClePrimaire) {
-                $sAliasClePrimaire = $this->aMappingChamps[$sClePrimaire];
-                $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
-            }
-        } else {
-            $sRequete .= 'AND ' . $sClePrimaire . ' = \'' . addslashes($oUnElement->$sAliasClePrimaire) . '\' ';
-        }
-        $this->sLog .= "==============================\n";
-        $this->sLog .= "Recherche ligne\n";
-        $this->sLog .= "==============================\n";
-        $this->sLog .= "- Ligne existe ?\n";
-        $this->sLog .= "----> $sRequete\n";
-        // $this->vLog('notice', $sRequete);
-        $aElement = $this->aSelectBDD($sRequete);
-
-        $aRetour['bExiste'] = empty($aElement) === false;
-        $aRetour['oLigne'] = $aElement[0] ?? new \StdClass();
-
-        $aMappingChamps = array_flip($this->aMappingChamps);
-        foreach ($oUnElement as $sAliasChamp => $sValeur) {
-            if ($sAliasChamp == 'nIdElement') {
-                // On ignore le nIdElement qui est un
-                // reliquat de la classe model.
-                continue;
-            }
-            if (isset($aMappingChamps[$sAliasChamp]) === false) {
-                // Si le champ n'est pas présent dans le mappingchamp
-                // c'est une erreur grave ! On s'arrête !
-                $this->vLog('critical', 'Erreur : champ introuvable dans le mapping champ de ' . $this->sNomTable . ' : ' . $sAliasChamp);
-                return false;
-            }
-            if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
-                continue;
-            }
-            // echo '-> '.$aMappingChamps[$sAliasChamp]."\n";
-
-            if ($aRetour['bExiste'] === false) {
-                $aRetour['aChamps'][] = $aMappingChamps[$sAliasChamp];
-                $aRetour['aValeur'][] = addslashes($sValeur);
-            } else {
-                $aRetour['aChamps'][] = $aMappingChamps[$sAliasChamp] . ' = \'' . addslashes($sValeur) . '\' ';
-            }
-        }
-        // var_dump($aRetour);
-        return $aRetour;
+        return $this->rConnexion->bLigneExiste($sCleSynchro, $oUnElement, $this->sNomTable, $mClePrimaire, $this->aMappingChamps);
     }
 
     /**
@@ -1135,19 +926,7 @@ class Bdd  extends UndeadBrain
      */
     protected function sDateFormat($sDate, $sFormat)
     {
-        if (!preg_match('/\./', $sDate)) {
-            $sDate = "'" . $sDate . "'";
-        }
-
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true && $GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
-            // SQLite
-            $sFormat = str_replace('%i', '%M', $sFormat);
-            $sFormat = str_replace('\h', 'h', $sFormat);
-            return 'strftime("' . $sFormat . '", ' . $sDate . ')';
-        } else {
-            // MySQL
-            return 'DATE_FORMAT(' . $sDate . ', \'' . $sFormat . '\')';
-        }
+        return $this->rConnexion->sDateFormat($sDate, $sFormat);
     }
 
     /**
@@ -1158,13 +937,7 @@ class Bdd  extends UndeadBrain
      */
     protected function sDatetimeCourant()
     {
-        if ($GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
-            $sDate = 'datetime(\'now\')';
-        } else {
-            $sDate = 'NOW()';
-        }
-
-        return $sDate;
+        return $this->rConnexion->sDatetimeCourant();
     }
 
     /**
@@ -1175,30 +948,7 @@ class Bdd  extends UndeadBrain
      */
     protected function sConcat($aChaine)
     {
-        if (isset($GLOBALS['aParamsBdd']['sqlite']) === true && $GLOBALS['aParamsBdd']['sqlite'] == 'oui') {
-            // SQLite
-            $aChaine = array_map(function($sChaine) 
-            {
-                if (preg_match('/strftime|\./', $sChaine)) {
-                    return $sChaine;
-                } else {
-                    return "'" . $sChaine . "'";
-                }
-            }, $aChaine);
-
-            return implode(" || ", $aChaine);
-        } else {
-            // MySQL
-            $aChaine = array_map(function($sChaine) 
-            {
-                if (preg_match('/DATE_FORMAT|\./', $sChaine)) {
-                    return $sChaine;
-                } else {
-                    return "'" . $sChaine . "'";
-                }
-            }, $aChaine);
-            return 'CONCAT(' . implode(", ", $aChaine) . ')';
-        }
+        return $this->rConnexion->sConcat($aChaine);
     }
 
     /**
@@ -1217,16 +967,10 @@ class Bdd  extends UndeadBrain
      */
     public function bDemarreProcess($rConnexion = null)
     {
-        if (is_null($rConnexion) === true) {
-            $rConnexion = $this->rConnexion;
-        }
+        $rConnexion = $rConnexion ?? $this->rConnexion;
 
         if ($this->bSansAnnulationProcess === false) {
-            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $rConnexion->query('BEGIN TRANSACTION;');
-            } else {
-                $rConnexion->beginTransaction();
-            }
+            $rConnexion->bDemarreProcess();
         }
     }
 
@@ -1236,16 +980,10 @@ class Bdd  extends UndeadBrain
      */
     public function bAnnuleProcess($rConnexion = null)
     {
-        if (is_null($rConnexion) === true) {
-            $rConnexion = $this->rConnexion;
-        }
+        $rConnexion = $rConnexion ?? $this->rConnexion;
 
         if ($this->bSansAnnulationProcess === false) {
-            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $rConnexion->query('ROLLBACK;');
-            } else {
-                $rConnexion->rollBack();
-            }
+            $rConnexion->bAnnuleProcess();
         }
     }
 
@@ -1255,15 +993,59 @@ class Bdd  extends UndeadBrain
      */
     public function bValideProcess($rConnexion = null)
     {
-        if (is_null($rConnexion) === true) {
-            $rConnexion = $this->rConnexion;
-        }
+        $rConnexion = $rConnexion ?? $this->rConnexion;
 
         if ($this->bSansAnnulationProcess === false) {
-            if (isset($GLOBALS['aParamsBdd']['sqlite']) === true) {
-                $rConnexion->query('COMMIT;');
+            $rConnexion->bValideProcess();
+        }
+    }
+
+    /**
+     * @param $sValeur
+     * @return string
+     */
+    public function quote($sValeur): string
+    {
+        return $this->rConnexion->quote($sValeur);
+    }
+
+    protected function nGetLastInsertId()
+    {
+        if ($this->bIsOracle) {
+            $sNomSequence = $this->sNomSequence();
+            return $this->rConnexion->nGetLastInsertId($sNomSequence);
+        }
+
+        return $this->rConnexion->lastInsertId();
+    }
+
+    protected function vLogErreurRequete(): void
+    {
+        $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        $this->vLog('critical', '<pre>' . $this->rConnexion->sDerniereRequete . '</pre>');
+        $this->vLog('critical', '<pre>' . print_r($this->rConnexion->aChampPrepareDerniereRequete, true) . '</pre>');
+        $this->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
+    }
+
+    /**
+     * @param $e
+     * @param $sCodeErreur
+     */
+    protected function vGererErreurSurContrainte($e, $sCodeErreur): void
+    {
+        if (isset($e) === true) {
+            $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
+            if ($bExceptionSurContrainte === true) {
+                throw $e;
             } else {
-                $rConnexion->commit();
+                switch ($sCodeErreur) {
+                    // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
+                    case '23000': // Violation de contrainte d'intégrité
+                        break;
+                    default:
+                        throw $e;
+                        break;
+                }
             }
         }
     }

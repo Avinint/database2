@@ -1,4 +1,4 @@
-version: 1.2.0
+version: 2.0.0
 
 hote:           localhost
 base:           framework
@@ -12,3 +12,6 @@ aNamespace:
       Bdd:   APP\Modules\Base\Lib\Bdd
 
 bExceptionSurContrainte: false # si false => les violations de contraintes (intégrité, unicité (liste à compléter)) ne throw pas d'exceptions (utiliser le retour = null). Si true => une exception est toujours thrown.
+
+aCritere:
+    Partiel: APP\Modules\Base\Lib\Recherche\Critere\Oracle\CriterePartiel
