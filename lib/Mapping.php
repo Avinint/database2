@@ -3,6 +3,7 @@
 namespace APP\Modules\Base\Lib;
 
 use APP\Modules\Base\Lib\Champ\Champ;
+use APP\Modules\Base\Lib\Champ\Enum;
 
 abstract class Mapping extends \ArrayObject
 {
@@ -32,9 +33,18 @@ abstract class Mapping extends \ArrayObject
             $aRetour[$sCle] = $oChamp
                 ->oSetNom($sCle)
                 ->oSetAliasParDefaut($this->sAlias);
+
+            if ($oChamp instanceof Enum) {
+                $oChamp->oSetLibelles($GLOBALS['aModules'][$_REQUEST['szModule']]['conf']['aListe-' . $this->sGetModel() . '-' . $oChamp->getNom()]);
+            }
         }
 
         return  $aRetour;
+    }
+
+    public function sGetModel()
+    {
+        return $this->sModel ?? str_replace('Mapping', '', (new ReflectionClass(get_called_class()))->getShortName());;
     }
 
 

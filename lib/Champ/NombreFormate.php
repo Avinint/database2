@@ -2,9 +2,9 @@
 
 namespace APP\Modules\Base\Lib\Champ;
 
-class NombreFormate extends Nombre
+class NombreFormatte extends Nombre
 {
-    public function sGetValeurEnregistree($sValeur) : string
+    public function sTraiterValeur($sValeur) : string
     {
         return (int) preg_replace('/[^\d\.\-]+/', '', $sValeur);
     }

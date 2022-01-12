@@ -995,4 +995,6 @@ class CorePDO extends \PDO
         }
         return $mValeur;
     }
+
+
 }

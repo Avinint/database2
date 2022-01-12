@@ -22,7 +22,7 @@ class Bdd extends UndeadBrain
 
     /**
      * Tableau de correspondance des champs et de leurs alias.
-     * @var array
+     * @var array|Mapping
      */
     protected $aMappingChamps;
 
@@ -50,9 +50,8 @@ class Bdd extends UndeadBrain
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($nIdElement = 0)
     {
-
         $this->sMessagePDO = '';
 
         $this->bIsOracle = $GLOBALS['aParamsBdd']['oracle'] ?? false;
@@ -62,12 +61,33 @@ class Bdd extends UndeadBrain
             $this->vConnexionBdd();
         }
 
-
         if (empty($this->sAlias)) {
             $this->sAlias = substr($this->sNomTable,  0, 3);
         }
 
         $this->sLog = '';
+
+        if (empty($this->oRecherche)) {
+            $this->oRecherche = new Recherche($this->aMappingChamps);
+        }
+
+        $this->vInitialiseProprietes($nIdElement);
+    }
+
+    /**
+     * @param $nIdElement
+     */
+    private function vInitialiseProprietes($nIdElement)
+    {
+        if ($nIdElement > 0) {
+            $aRecherche = array($this->sNomChampId() => $nIdElement);
+            $aElements = $this->aGetElements($aRecherche);
+            if (isset($aElements[0]) === true) {
+                foreach ($aElements[0] as $szCle => $szValeur) {
+                    $this->$szCle = $szValeur;
+                }
+            }
+        }
     }
 
     public function bRessourceLogsPresente()
@@ -255,9 +275,9 @@ class Bdd extends UndeadBrain
     /**
      * @throws \Exception
      */
-    protected function szGetCriteresRecherche($aRecherche = [], $sContexte = [])
+    protected function szGetCriteresRecherche($aRecherche = [])
     {
-        $this->oRecherche->vAjouterCriteresRecherche($aRecherche, $sContexte);
+        $this->oRecherche->vAjouterCriteresRecherche($aRecherche);
 
         return $this->oRecherche->sGetTexte();
     }
@@ -273,7 +293,7 @@ class Bdd extends UndeadBrain
      *
      * @return array                Liste des éléments
      */
-    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = '', $szOrderBy = '', $szGroupBy = '', $szContexte = '')
+    public function aGetElements($aRecherche = array(), $nStart = 0, $nNbElements = 0, $szOrderBy = '', $szGroupBy = '', $szContexte = '')
     {
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy, $szContexte);
 //        $szRequete = $this->sPaginerRequete($nNbElements, $nStart, $szRequete);
@@ -1048,5 +1068,16 @@ class Bdd extends UndeadBrain
                 }
             }
         }
+    }
+
+    public function sGetNomChampId()
+    {
+        if(empty($this->aMappingChamps[$this->sNomCle]) === false)
+        {
+            return $this->aMappingChamps[$this->sNomCle];
+        }
+
+        throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
+
     }
 }

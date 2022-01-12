@@ -10,5 +10,5 @@ interface CritereInterface
 
     public function vSetOperateurLogique(string $sOperateur);
 
-    public function bEstValide() : bool;
+    public function bDoitEtreAjoute() : bool;
 }

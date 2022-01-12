@@ -55,7 +55,7 @@ class Recherche implements RechercheInterface
             $oCritere = $this->oGenererCritereSpecifique($sCle);
             unset ($aRecherche[$sCle]);
 
-            if ($oCritere->bEstValide()) {
+            if ($oCritere->bDoitEtreAjoute()) {
                 $this->vAjouterCritere($oCritere);
             }
         }
@@ -63,7 +63,7 @@ class Recherche implements RechercheInterface
         foreach ($aRecherche as $sCle => $sValeur) {
             if (isset($sValeur)) {
                 $oCritere = $this->oGenererCritere($sCle, $sValeur);
-                if (!$oCritere instanceof CritereInexistant || $oCritere->bEstValide()) {
+                if (!$oCritere instanceof CritereInexistant || $oCritere->bDoitEtreAjoute()) {
                     $this->vAjouterCritere($oCritere);
                 }
             }
@@ -118,9 +118,13 @@ class Recherche implements RechercheInterface
      */
     public function vAjouterCritere(CritereInterface $oCritere)
     {
-        if ($oCritere->bEstValide()) {
+        if ($oCritere->bDoitEtreAjoute()) {
             if (empty($this->aCriteres)) {
                 $oCritere->vSetOperateurLogique('WHERE');
+            }
+
+            if ($oCritere->nGetErreur()) {
+                $this->aErreur[] = $oCritere->nGetErreur();
             }
 
             $this->aCriteres[] = $oCritere;
@@ -128,7 +132,7 @@ class Recherche implements RechercheInterface
     }
 
     /**
-     * @return RechercheInterface[]
+     * @return array
      */
     public function aGetCriteres(): array
     {

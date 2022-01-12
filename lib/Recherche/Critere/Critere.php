@@ -4,16 +4,18 @@ namespace APP\Ressources\Base\Lib\Recherche\Critere;
 
 use APP\Modules\Base\Lib\Champ\Champ;
 
-abstract class Critere implements CritereInterface
+class Critere implements CritereInterface
 {
     protected $sCle;
     protected $mValeur;
     protected $sOperateur;
     protected $sOperateurLogique;
 
+    protected $nErreur = 0;
+
     public function __construct(Champ $oChamp, $mValeur, $sOperateur = '=', $sOperateurLogique = 'AND')
     {
-        $this->sCle = $this->sGenererCle($oChamp);
+        $this->sCle = static::sGenererCle($oChamp);
         $this->mValeur = $mValeur;
         $this->sOperateur = $sOperateur;
         $this->sOperateurLogique = $sOperateurLogique;
@@ -25,7 +27,7 @@ abstract class Critere implements CritereInterface
      * @param Champ $oChamp
      * @return string
      */
-    protected function sGenererCle(Champ $oChamp)
+    protected static function sGenererCle(Champ $oChamp)
     {
         return $oChamp->sGetColonnePrefixee();
     }
@@ -51,7 +53,7 @@ abstract class Critere implements CritereInterface
         return $this->sGetTexte();
     }
 
-    public function sGetTexte()
+    public function sGetTexte() : string
     {
         return "$this->sOperateurLogique $this->sCle $this->sOperateur $this->mValeur";
     }
@@ -61,9 +63,17 @@ abstract class Critere implements CritereInterface
         return $this->sCle;
     }
 
-    public function bEstValide() : bool
+    public function bDoitEtreAjoute() : bool
     {
         return isset($this->mValeur);
+    }
+
+    /**
+     * @return int
+     */
+    public function nGetErreur(): int
+    {
+        return $this->nErreur;
     }
 
     protected function sGetValeurPourRecherche($oChamp, $mValeur)

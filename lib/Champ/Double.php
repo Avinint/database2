@@ -4,7 +4,7 @@ namespace APP\Modules\Base\Lib\Champ;
 
 class Double extends Nombre
 {
-    public function sGetValeurEnregistree($sValeur) : string
+    public function sTraiterValeur($sValeur) : string
     {
        return (float)(str_replace(',', '.', $sValeur));
     }
@@ -21,6 +21,6 @@ class Double extends Nombre
 
     public function sFormatterValeurSQL($mValeur)
     {
-        return $this->sGetValeurEnregistree($mValeur);
+        return $this->sTraiterValeur($mValeur);
     }
 }

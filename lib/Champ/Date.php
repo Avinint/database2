@@ -7,7 +7,7 @@ class Date extends Char
     protected $sFormatLibelle = 'd/m/Y';
     protected $sFormatSQL = 'Y-m-d';
 
-    public function sGetValeurEnregistree($sValeur) : string
+    public function sTraiterValeur($sValeur) : string
     {
         $dDate = self::$rConnexion->quote($sValeur);
 

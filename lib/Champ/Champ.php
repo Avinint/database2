@@ -81,11 +81,13 @@ abstract class Champ
     }
 
     /**
-     * Utilisé pour convertir une valeur à un format sql correct, par exemple un nombre décimal avec un point pour les critère de recherche ou l'écriture
+     * Utilisé pour convertir une valeur à un format sql correct,
+     * par exemple un nombre décimal avec un point pour les critère de recherche ou l'écriture
+     * et échapper les saisies des utilisateurs
      * @param $mValeur
      * @return string
      */
-    public function sGetValeurEnregistree($mValeur) : string
+    public function sTraiterValeur($mValeur) : string
     {
         return self::$rConnexion->quote($mValeur);
     }
@@ -98,7 +100,7 @@ abstract class Champ
     public function sConvertirTableauValeurEnTexte(array $aValeur): string
     {
         return implode(', ', array_map(function ($mValeur) {
-            $this->sGetValeurEnregistree($mValeur);
+            $this->sTraiterValeur($mValeur);
         }, $aValeur));
     }
 
@@ -119,7 +121,7 @@ abstract class Champ
      * @param $mValeur
      * @return bool
      */
-    public function bActifDansRecherche($mValeur)
+    public function bEstRenseigne($mValeur)
     {
         return !empty($mValeur);
     }

@@ -8,7 +8,7 @@ class CritereEgal extends Critere
 {
     public function __construct(Champ $oChamp, $mValeur)
     {
-        $mValeur = $oChamp->bActifDansRecherche($mValeur) ? $oChamp->sGetValeurEnregistree($mValeur) : null;
+        $mValeur = $oChamp->bEstRenseigne($mValeur) ? $oChamp->sTraiterValeur($mValeur) : null;
 
         parent::__construct($oChamp, $mValeur);
     }
