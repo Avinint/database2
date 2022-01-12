@@ -1,4 +1,9 @@
-# Version courante : 1.2.0
+# Version courante : 2.0.1
+
+
+* **v2.0.1 : Correctifs suite à la mise à jour, renommages, possibilité pour les critères de recherche d'emettre des messages d'erreur, type champ enum
+
+* **v2.0.0 : Mise à jour majeure: Possibilité de gérer d'autres sgbdr comme Oracle et changements d'architecture
 
 * **v1.2.0 : Utilisation de fetch par ligne au lieu de fetchAll dans le aSelectBdd pour éviter de copier deux fois les données des lignes**
 
