@@ -3,6 +3,7 @@
 namespace APP\Modules\Base\Lib\RequeteBuilder\MySQL;
 
 use APP\Modules\Base\Lib\Champ\Champ;
+use APP\Modules\Base\Lib\Champ\Oracle\CleEtrangere;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 
 class RequeteBuilder implements RequeteBuilderInterface
@@ -107,19 +108,19 @@ class RequeteBuilder implements RequeteBuilderInterface
      * @param $sRestriction
      * @return $this
      */
-    public function oLeftJoin($sTable, $sNomChamp, $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
+    public function oLeftJoin($sNomChamp, $sTable = '', $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
     {
-        return $this->oJoin('LEFT', $sTable, $sNomChamp, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
+        return $this->oJoin('LEFT', $sNomChamp, $sTable, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
     }
 
-    public function oRightJoin($sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
+    public function oRightJoin($sNomChamp, $sTable = '', $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
     {
-        return $this->oJoin('RIGHT', $sTable, $sNomChamp, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
+        return $this->oJoin('RIGHT', $sNomChamp, $sTable, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
     }
 
-    public function oInnerJoin($sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
+    public function oInnerJoin($sNomChamp, $sTable = '', $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
     {
-        return $this->oJoin('INNER', $sTable, $sNomChamp, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
+        return $this->oJoin('INNER', $sNomChamp, $sTable, $sAliasJointure, $sAlias, $sNomClePrimaire, $sRestriction);
     }
 
     /** Génération de jointures
@@ -132,10 +133,14 @@ class RequeteBuilder implements RequeteBuilderInterface
      * @param $sRestriction
      * @return $this
      */
-    public function oJoin($sType, $sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
+    public function oJoin($sType, $sNomChamp, $sTable = '', $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
     {
-
-        $sNomColonne = $this->oGetChamp($sNomChamp)->sGetColonne();
+        $oChamp = $this->oGetChamp($sNomChamp);
+        if ($oChamp instanceof CleEtrangere && empty($sTable)) {
+            $sTable = $oChamp->sGetTableCible();
+            $sAliasJointure = $oChamp->sGetAliasTablecible();
+        }
+        $sNomColonne = $oChamp->sGetColonne();
         $sNomClePrimaire = $sNomClePrimaire ? $this->oGetChamp($sNomClePrimaire)->sGetColonne() : $sNomColonne;
         $sAlias = $sAlias ?: $this->oMapping->sGetAlias();
 
