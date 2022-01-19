@@ -182,7 +182,7 @@ class CorePDOOracle extends CorePDO
      */
     public function nGetLastInsertId($sNomSequence = '')
     {
-        $sRequete = "SELECT ".$sNomSequence . ".CURRVAL AS nIdElement FROM dual";
+        $sRequete = 'SELECT '.$sNomSequence . '.CURRVAL AS "nIdElement" FROM dual';
         $aElement = $this->aSelectBDD($sRequete);
 
         $aUneData = $aElement[0] ?? null;
