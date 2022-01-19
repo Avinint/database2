@@ -70,7 +70,22 @@ class RequeteBuilder implements RequeteBuilderInterface
             [$sUnChamp, $sAliasChamp] = $sUnChamp;
         }
 
+        $oChamp = $this->oGetChamp($sUnChamp);
+        if (!$oChamp instanceof Champ) {
+            $sNomMapping = $this->sGetClasseMapping();
+            $sNomModele = str_replace('Mapping', '', $sNomMapping);
+            throw new \Exception("Utilisation du Champ \"$sUnChamp\" inexistant dans $sNomMapping comme parametre de oSelect dans $sNomModele");
+            return '';
+        }
+
         return $this->oGetChamp($sUnChamp)->sGetSelect($sAliasChamp);
+
+    }
+
+    protected function sGetClasseMapping()
+    {
+        $aNamespace = explode('\\', get_class($this->oMapping));
+        return end($aNamespace);
     }
 
     /**
