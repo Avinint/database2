@@ -518,7 +518,21 @@ class CorePDO extends \PDO
         $this->sDerniereRequete = $oRequetePrepare->queryString;
         $this->aChampPrepareDerniereRequete = $aChampsPrepare;
 
-        $mResultat = $oRequetePrepare->execute($aChampsPrepare);
+        try {
+            $mResultat = $oRequetePrepare->execute($aChampsPrepare);
+        } catch (\PDOException $e) {
+            /**
+             * Contient les infos sur l'erreur SQL :
+             * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)
+             * [1] => Code d'erreur du driver spécifique
+             * [2] => Message d'erreur spécifique au driver
+             * @var array $infosErreur
+             */
+            $nCodeErreur = $e->getCode();
+            $this->vLogErreurRequete();
+        } finally {
+            $this->vGererErreurSurContrainte($e, $nCodeErreur);
+        }
 
         return $mResultat;
 
@@ -994,6 +1008,76 @@ class CorePDO extends \PDO
             $mValeur = $oChamp->mGetValeur($mValeur);
         }
         return $mValeur;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function sDebugRequetePreparee()
+    {
+        $sRequete = $this->sDerniereRequete;
+        $aChamps = $this->aChampPrepareDerniereRequete;
+
+        if (!empty($aChamps)) {
+            foreach ($aChamps as $sChamp => $mValeur) {
+                if (is_object($mValeur) === true) {
+                    if ($mValeur instanceof \DateTime) {
+                        $mValeur = $mValeur->format('Y-m-d H:i:s');
+                    } else {
+                        continue;
+                    }
+                } elseif (is_string($mValeur) === true) {
+                    $mValeur = "'" . addslashes($mValeur) . "'";
+                } elseif ($mValeur === null) {
+                    $mValeur = 'NULL';
+                } elseif (is_array($mValeur) === true) {
+                    $mValeur = implode(',', $mValeur);
+                }
+                $sRequete = str_replace(':'. $sChamp, $mValeur, $sRequete);
+
+                //$sRequete = preg_replace('/:(\b' . str_replace(':', '', $sChamp) . '\b)/', $mValeur, $sRequete);
+            }
+        }
+        return $sRequete;
+    }
+
+    /**
+     * @return string
+     */
+    protected function vLogErreurRequete(): string
+    {
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . $this->sDerniereRequete . '</pre>');
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . print_r($this->aChampPrepareDerniereRequete, true) . '</pre>');
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' .  'ERREUR SQL GRAVE : ' . $this->sDebugRequetePreparee(). '</pre>');
+
+        $this->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
+
+        return $this->sMessagePDO;
+    }
+
+
+    /**
+     * @param $e
+     * @param $sCodeErreur
+     */
+    protected function vGererErreurSurContrainte($e, $sCodeErreur): void
+    {
+        if (isset($e)) {
+            $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
+            if ($bExceptionSurContrainte === true) {
+                throw $e;
+            } else {
+                switch ($sCodeErreur) {
+                    // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
+                    case '23000': // Violation de contrainte d'intégrité
+                        break;
+                    default:
+                        throw $e;
+                        break;
+                }
+            }
+        }
     }
 
 

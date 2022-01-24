@@ -256,7 +256,7 @@ class Bdd extends UndeadBrain
         } else {
             $oRequete
                 ->oGroupBy($sGroupBy)
-                ->oOrderBy($szOrderBy);
+                ->oInitOrderBy($szOrderBy);
         }
 
         return $oRequete;
@@ -675,26 +675,10 @@ class Bdd extends UndeadBrain
      */
     public function bInsert($aChamps = array(), $aChampsNull = array())
     {
-        $bRetour = false;
-
         $sNomTable = $this->sNomTable();
         $sNomChampId = $this->sNomChampId();
 
-        try {
-            $bRetour = $this->rConnexion->bInsert($this->aMappingChamps, $aChamps, $aChampsNull);
-        } catch (\PDOException $e) {
-            /**
-             * Contient les infos sur l'erreur SQL :
-             * [0] => Code d'erreur SQLSTATE (défini par rapport au standard ANSI SQL)
-             * [1] => Code d'erreur du driver spécifique
-             * [2] => Message d'erreur spécifique au driver
-             * @var array $infosErreur
-             */
-            $nCodeErreur = $e->getCode();
-            $this->vLogErreurRequete();
-        } finally {
-            $this->vGererErreurSurContrainte($e, $nCodeErreur);
-        }
+        $bRetour = $this->rConnexion->bInsert($this->aMappingChamps, $aChamps, $aChampsNull);
 
         $this->$sNomChampId = $this->nGetLastInsertId();
 
@@ -715,19 +699,10 @@ class Bdd extends UndeadBrain
      */
     public function bUpdate($aChamps = array(), $aChampsNull = array())
     {
-        $bRetour = false;
-
         $sNomTable = $this->sNomTable();
         $sNomChampId = $this->sNomChampId();
 
-        try {
-            $bRetour = $this->rConnexion->bUpdate($this->aMappingChamps, $this->$sNomChampId, $aChamps, $aChampsNull);
-        } catch (\PDOException $e) {
-            $nCodeErreur = $e->getCode();
-            $this->vLogErreurRequete();
-        } finally {
-            $this->vGererErreurSurContrainte($e, $nCodeErreur);
-        }
+        $bRetour = $this->rConnexion->bUpdate($this->aMappingChamps, $this->$sNomChampId, $aChamps, $aChampsNull);
 
         if ($bRetour && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
             $this->bSetLog("update_{$sNomTable}", $this->$sNomChampId);
@@ -747,18 +722,11 @@ class Bdd extends UndeadBrain
      */
     public function bDelete()
     {
-        $bRetour = false;
         $sNomTable = $this->sNomTable();
         $sNomChampId = $this->sNomChampId();
         $sNomCle = $this->sNomCle();
-        try {
-            $bRetour = $this->rConnexion->bDelete($this->$sNomChampId, $sNomTable, $sNomCle);
-        } catch (\PDOException $e) {
-            $nCodeErreur = $e->getCode();
-            $this->vLogErreurRequete();
-        } finally {
-            $this->vGererErreurSurContrainte($e, $nCodeErreur);
-        }
+
+        $bRetour = $this->rConnexion->bDelete($this->$sNomChampId, $sNomTable, $sNomCle);
 
         if($bRetour && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
             $this->bSetLog("delete_{$sNomTable}", $this->$sNomChampId);
@@ -1039,37 +1007,6 @@ class Bdd extends UndeadBrain
         return $this->rConnexion->lastInsertId();
     }
 
-    protected function vLogErreurRequete(): void
-    {
-        $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-        $this->vLog('critical', '<pre>' . $this->rConnexion->sDerniereRequete . '</pre>');
-        $this->vLog('critical', '<pre>' . print_r($this->rConnexion->aChampPrepareDerniereRequete, true) . '</pre>');
-        $this->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
-    }
-
-    /**
-     * @param $e
-     * @param $sCodeErreur
-     */
-    protected function vGererErreurSurContrainte($e, $sCodeErreur): void
-    {
-        if (isset($e) === true) {
-            $bExceptionSurContrainte = $GLOBALS['aModules']['base']['conf']['bExceptionSurContrainte'];
-            if ($bExceptionSurContrainte === true) {
-                throw $e;
-            } else {
-                switch ($sCodeErreur) {
-                    // Rejouter ici des codes erreur SQLSTATE pour ne pas throw d'exceptions dans ces cas précis
-                    case '23000': // Violation de contrainte d'intégrité
-                        break;
-                    default:
-                        throw $e;
-                        break;
-                }
-            }
-        }
-    }
-
     public function sGetNomChampId()
     {
         if(empty($this->aMappingChamps[$this->sNomCle]) === false)
@@ -1080,4 +1017,6 @@ class Bdd extends UndeadBrain
         throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
 
     }
+
+
 }

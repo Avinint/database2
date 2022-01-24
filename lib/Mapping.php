@@ -9,6 +9,7 @@ abstract class Mapping extends \ArrayObject
 {
     public $sNomChampId;
     public $sNomCle;
+    protected $sGetOrderBy;
 
     public function sGetColonneAliasee($sCle)
     {
@@ -61,5 +62,10 @@ abstract class Mapping extends \ArrayObject
     public function sNomSequence()
     {
         return $this->sNomSequence;
+    }
+
+    public function sGetOrderBy()
+    {
+        return $this->sOrderBy;
     }
 }

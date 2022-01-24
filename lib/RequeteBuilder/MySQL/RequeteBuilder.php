@@ -4,17 +4,19 @@ namespace APP\Modules\Base\Lib\RequeteBuilder\MySQL;
 
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Champ\Oracle\CleEtrangere;
+use APP\Modules\Base\Lib\Mapping;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
+use APP\Ressources\Base\Lib\Exception\ChampInexistantException;
 
 class RequeteBuilder implements RequeteBuilderInterface
 {
     protected $aSelect  = [];
     protected $sFrom = '';
-    protected $oMapping;
+    protected Mapping $oMapping;
     protected $aJoins = [];
     protected $sWhere = '';
-    protected $sGroupBy = '';
-    protected $sOrderBy = '';
+    protected $aGroupBy = [];
+    protected $aOrderBy = [];
     protected $sHaving = '';
     protected $nStart = 1;
     protected $nNbElements = 0;
@@ -64,22 +66,19 @@ class RequeteBuilder implements RequeteBuilderInterface
      * @param array $aSelect
      * @return string
      */
-    private function sAjouterSelect($sUnChamp, $sAliasChamp = '') : string
+    protected function sAjouterSelect($sNomChamp, $sAliasChamp = '') : string
     {
-        if (is_array($sUnChamp)) {
-            [$sUnChamp, $sAliasChamp] = $sUnChamp;
+        if (is_array($sNomChamp)) {
+            [$sNomChamp, $sAliasChamp] = $sNomChamp;
         }
 
-        $oChamp = $this->oGetChamp($sUnChamp);
-        if (!$oChamp instanceof Champ) {
-            $sNomMapping = $this->sGetClasseMapping();
-            $sNomModele = str_replace('Mapping', '', $sNomMapping);
-            throw new \Exception("Utilisation du Champ \"$sUnChamp\" inexistant dans $sNomMapping comme parametre de oSelect dans $sNomModele");
-            return '';
+        $oChamp = $this->oGetChamp($sNomChamp) ?? null;
+
+        if ($oChamp instanceof Champ) {
+            return $oChamp->sGetSelect($sAliasChamp);
         }
 
-        return $this->oGetChamp($sUnChamp)->sGetSelect($sAliasChamp);
-
+        return $sNomChamp;
     }
 
     protected function sGetClasseMapping()
@@ -155,8 +154,14 @@ class RequeteBuilder implements RequeteBuilderInterface
             $sTable = $oChamp->sGetTableCible();
             $sAliasJointure = $oChamp->sGetAliasTablecible();
         }
-        $sNomColonne = $oChamp->sGetColonne();
-        $sNomClePrimaire = $sNomClePrimaire ? $this->oGetChamp($sNomClePrimaire)->sGetColonne() : $sNomColonne;
+
+        if ($oChamp instanceof Champ) {
+            $sNomColonne = $oChamp->sGetColonne();
+            $sNomClePrimaire = $sNomClePrimaire ? $this->oGetChamp($sNomClePrimaire)->sGetColonne() : $sNomColonne;
+        } else {
+            throw new ChampInexistantException($sNomChamp, $this->sGetClasseMapping());
+        }
+
         $sAlias = $sAlias ?: $this->oMapping->sGetAlias();
 
         if ($sRestriction) {
@@ -168,13 +173,39 @@ class RequeteBuilder implements RequeteBuilderInterface
         return $this;
     }
 
+    /**
+     * Ajoute un ou plusieurs champs à une clause GROUP BY
+     * @param $mGroupBy
+     * @return RequeteBuilderInterface
+     */
     public function oGroupBy($mGroupBy = '') : RequeteBuilderInterface
     {
         if (!empty($mGroupBy)) {
-           $this->sGroupBy =  PHP_EOL . $this->sIndentation .  'GROUP BY ' . is_array($mGroupBy) ? implode(', ', $mGroupBy) : $mGroupBy;
+            if (is_array($mGroupBy)) {
+                $this->aGroupBy = array_flip(array_flip(array_merge(
+                    $this->aGroupBy,
+                    array_map(function($sGroupBy) {return $this->sParseGroupBy($sGroupBy);}, $mGroupBy)
+                )));
+            } else {
+                $this->aGroupBy[] = $this->sParseGroupBy($mGroupBy);
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * Remplace un champ ajouté au GROUP BY par la colonne préfixée de l'alias de table
+     * @param $sGroupBy
+     * @return mixed|string
+     */
+    public function sParseGroupBy($sGroupBy)
+    {
+        if ($oChamp = $this->oGetChamp($sGroupBy)) {
+            $sGroupBy = $oChamp->sGetColonnePrefixee();
+        }
+
+        return $sGroupBy;
     }
 
     public function oLimit($nStart, $nNbElements) : RequeteBuilderInterface
@@ -185,17 +216,55 @@ class RequeteBuilder implements RequeteBuilderInterface
         return $this;
     }
 
-    public function oOrderBy($sOrderBy = '') : RequeteBuilderInterface
+    /** Initialise la liste des ORDER BY. Si des ORDER BY ont déja été ajoutés ils sont effacés
+     * @param $sOrderBy
+     * @return RequeteBuilderInterface
+     */
+    public function oInitOrderBy($sOrderBy = '') : RequeteBuilderInterface
     {
-        if (!empty($sOrderBy)) {
-            $sOrderBy = is_array($sOrderBy) ? implode(', ', $sOrderBy) : $sOrderBy;
-        } else {
-            $sOrderBy = $this->oMapping->sNomCle . ' DESC';
+        if (empty($sOrderBy)) {
+            $sOrderBy = $this->oMapping->sGetOrderBy();
         }
 
-        $this->sOrderBy = PHP_EOL  . $this->sIndentation . 'ORDER BY ' . $sOrderBy;
+        if (is_array($sOrderBy)) {
+            $this->aOrderBy = array_map(function ($sUnOrderBy) { return $this->sParseOrderBy($sUnOrderBy); }, $sOrderBy);
+        } else {
+            $this->aOrderBy = [$this->sParseOrderBy($sOrderBy)];
+        }
 
         return $this;
+    }
+
+    /** Permet d'ajouter des ORDER BY à la liste
+     * @param $sOrderBy
+     * @return $this
+     */
+    public function oOrderBy($sOrderBy = '')
+    {
+        if (is_array($sOrderBy)) {
+            $this->aOrderBy = array_flip(array_flip(array_merge($this->aOrderBy, array_map(function ($sUnOrderBy) { return $this->sParseOrderBy($sUnOrderBy); }, $sOrderBy))));
+        } else {
+            $this->aOrderBy[] = $this->sParseOrderBy($sOrderBy);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remplace les champs ajoutés à la clause ORDER BY par des colonnes préfixées des alias de table
+     *
+     * @param $sOrderBy
+     * @return string
+     */
+    public function sParseOrderBy($sOrderBy)
+    {
+        [$sColonne, $sOrdre] = explode(" ", $sOrderBy) + ["", "DESC"];
+
+        if ($oChamp = $this->oGetChamp($sColonne)) {
+            $sColonne = $oChamp->sGetColonnePrefixee();
+        }
+
+        return $sColonne . ' ' . $sOrdre;
     }
 
     protected function sGetSelect()
@@ -213,14 +282,32 @@ class RequeteBuilder implements RequeteBuilderInterface
         return PHP_EOL . $this->sIndentation .  implode(PHP_EOL. $this->sIndentation, $this->aJoins);
     }
 
+    protected function sGetOrderBy()
+    {
+        if (empty($this->aOrderBy)) {
+            return '';
+        }
+
+        return PHP_EOL .  $this->sIndentation  .  'ORDER BY ' . implode(',' . PHP_EOL. $this->sIndentation, $this->aOrderBy);
+    }
+
+    protected function sGetGroupBy()
+    {
+        if (empty($this->aGroupBy)) {
+            return '';
+        }
+
+        return PHP_EOL . $this->sIndentation .  'GROUP BY ' . implode(', ', $this->aGroupBy);
+    }
+
     public function __toString()
     {
         return $this->sGetSelect()
             . $this->sGetFrom()
             . $this->sGetJoins()
-            . $this->sWhere
-            . $this->sGroupBy
-            . $this->sOrderBy
+            . $this->sGetWhere()
+            . $this->sGetGroupBy()
+            . $this->sGetOrderBy()
             . $this->sHaving
             . $this->sPagination();
     }
@@ -240,23 +327,16 @@ class RequeteBuilder implements RequeteBuilderInterface
         return '';
     }
 
-    /**
-     * @param array $sUnChamp
-     * @param $sAliasChamp
-     * @return array
-     */
-//    private function aAjouterChampAvecAlias(array $sUnChamp): array
-//    {
-//        [$sUnChamp, $sAliasChamp] = $sUnChamp;
-//
-//        return [$sUnChamp, '"' . $sAliasChamp. '"'];
-//    }
-
     public function oWhere($sCriteres)
     {
-        $this->sWhere .= PHP_EOL . $this->sIndentation .  $sCriteres;
+        $this->sWhere .= $sCriteres ? PHP_EOL . $this->sIndentation .  $sCriteres : '';
 
         return $this;
+    }
+
+    public function sGetWhere()
+    {
+        return $this->sWhere;
     }
 
     public function sGetAlias()
@@ -265,12 +345,11 @@ class RequeteBuilder implements RequeteBuilderInterface
     }
 
     /**
-     * @param $sChamp
+     * @param string $sChamp
      * @return Champ|null
      */
-    public function oGetChamp($sChamp) : ?Champ
+    public function oGetChamp(string $sChamp) : ?Champ
     {
-
         return $this->oMapping[$sChamp] ?? null;
     }
 }

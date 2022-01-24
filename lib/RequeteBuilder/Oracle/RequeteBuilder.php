@@ -9,7 +9,6 @@ class RequeteBuilder extends BaseRequeteBuilder
 {
     protected $aSelect  = [];
     protected $sFrom = '';
-    protected $oMapping;
     protected $aJoins = [];
     protected $sWhere = '';
     protected $sGroupBy = '';
@@ -29,9 +28,9 @@ class RequeteBuilder extends BaseRequeteBuilder
         $sRequete = $this->sGetSelect()
             . $this->sGetFrom()
             . $this->sGetJoins()
-            .PHP_EOL . $this->sIndentation . $this->sWhere
-            . $this->sGroupBy
-            .  $this->sOrderBy
+            . $this->sGetWhere()
+            . $this->sGetGroupBy()
+            . $this->sGetOrderBy()
             . $this->sHaving;
 
         return $this->sPaginerRequete($sRequete);
@@ -55,12 +54,11 @@ FROM (
     FROM
     (
         ' . $szRequete . '
-        ) tmp
-        WHERE rownum <= ' . $this->nNbElements . '
-    ) WHERE rownum > ' . $this->nStart . '
+    ) tmp
+    WHERE rownum <= ' . $this->nNbElements . '
+) WHERE rownum > ' . $this->nStart . '
     ';
         }
-
 
         return $szRequete;
     }
@@ -80,6 +78,11 @@ FROM (
         }
 
         return $this;
+    }
+
+    public function sGetWhere()
+    {
+        return $this->sWhere ? PHP_EOL . $this->sIndentation . $this->sWhere : '';
     }
 
 }

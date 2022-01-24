@@ -185,7 +185,7 @@ class Recherche implements RechercheInterface
      */
     public function sGetTexte(): string
     {
-        return implode(PHP_EOL . "    ",  $this->aCriteres);
+        return trim(implode(PHP_EOL . "    ",  $this->aCriteres));
     }
 
     /**
