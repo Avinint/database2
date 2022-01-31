@@ -66,6 +66,6 @@ abstract class Mapping extends \ArrayObject
 
     public function sGetOrderBy()
     {
-        return $this->sOrderBy;
+        return $this->sOrderBy ?? $this->sNomChampId . ' DESC';
     }
 }
