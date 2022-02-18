@@ -50,13 +50,13 @@ class RequeteBuilder extends BaseRequeteBuilder
             $szRequete = '
 SELECT *
 FROM (
-    SELECT tmp.*, rownum
+    SELECT tmp.*, rownum NUM_LIGNE
     FROM
     (
         ' . $szRequete . '
     ) tmp
-    WHERE rownum <= ' . $this->nNbElements . '
-) WHERE rownum > ' . $this->nStart . '
+    WHERE rownum <= ' . ($this->nNbElements + $this->nStart)  . '
+) WHERE NUM_LIGNE > ' . $this->nStart . '
     ';
         }
 

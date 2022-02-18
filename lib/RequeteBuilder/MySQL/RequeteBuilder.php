@@ -11,6 +11,7 @@ use APP\Ressources\Base\Lib\Exception\ChampInexistantException;
 class RequeteBuilder implements RequeteBuilderInterface
 {
     protected $aSelect  = [];
+    protected $bDistinct = false;
     protected $sFrom = '';
     protected Mapping $oMapping;
     protected $aJoins = [];
@@ -43,6 +44,13 @@ class RequeteBuilder implements RequeteBuilderInterface
     public function oSelectCount() : RequeteBuilderInterface
     {
         $this->aSelect[] =  'COUNT(*) AS "nNbElements"';
+
+        return $this;
+    }
+
+    public function oDistinct(bool $distinct = true) : RequeteBuilderInterface
+    {
+        $this->bDistinct = $distinct;
 
         return $this;
     }
@@ -269,7 +277,7 @@ class RequeteBuilder implements RequeteBuilderInterface
 
     protected function sGetSelect()
     {
-        return 'SELECT ' . (empty($this->aSelect) ? ' * ' : implode(',' . PHP_EOL . $this->sIndentation, $this->aSelect));
+        return 'SELECT '. ($this->bDistinct ?  'DISTINCT ' : '') . (empty($this->aSelect) ? ' * ' : implode(',' . PHP_EOL . $this->sIndentation, $this->aSelect));
     }
 
     protected function sGetFrom()
@@ -352,4 +360,6 @@ class RequeteBuilder implements RequeteBuilderInterface
     {
         return $this->oMapping[$sChamp] ?? null;
     }
+
+
 }

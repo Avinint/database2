@@ -2,7 +2,6 @@
 
 namespace APP\Modules\Base\Lib;
 use APP\Core\Lib\Interne\PHP\Utiles;
-use APP\Modules\Base\Lib\Champ\Champ;
 
 class CorePDO extends \PDO
 {
@@ -303,9 +302,9 @@ class CorePDO extends \PDO
         return $bRetour;
 
 //        if ($bRetour === false) {
-//            $this->vLog('critical', $sRequete);
-//            $this->vLog('critical', '<pre>' . print_r($aPreparationRequete['aChampsPrepare'], true) . '</pre>');
-//            $this->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
+//            $GLOBALS['oUtiles']->vLog('critical', $sRequete);
+//            $GLOBALS['oUtiles']->vLog('critical', '<pre>' . print_r($aPreparationRequete['aChampsPrepare'], true) . '</pre>');
+//            $GLOBALS['oUtiles']->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
 //            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
 //        } else {
 //
@@ -515,6 +514,7 @@ class CorePDO extends \PDO
      */
     protected function bExecuterRequetePrepare(\PDOStatement $oRequetePrepare, $aChampsPrepare = array())
     {
+
         $this->sDerniereRequete = $oRequetePrepare->queryString;
         $this->aChampPrepareDerniereRequete = $aChampsPrepare;
 
@@ -556,13 +556,13 @@ class CorePDO extends \PDO
             $this->sLog .= "----> $sRequete\n";
         }
         if (isset($GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate']) === true && $GLOBALS['aParamsAppli']['conf']['bLogRequeteInsertOuUpdate'] === true) {
-            $this->vLog('notice', $sRequete);
+            $GLOBALS['oUtiles']->vLog('notice', $sRequete);
         }
         $rLien = $this->rConnexion->query($sRequete);
 
         if (!$rLien) {
             $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-            $this->vLog('critical', $sRequete);
+            $GLOBALS['oUtiles']->vLog('critical', $sRequete);
             return false;
         }
 
@@ -596,13 +596,13 @@ class CorePDO extends \PDO
             $this->sLog .= "- Insertion car absente\n";
             $this->sLog .= "----> $sRequete\n";
 
-            $this->vLog('notice', $sRequete);
+            $GLOBALS['oUtiles']->vLog('notice', $sRequete);
 
             $rLien = $this->rConnexion->query($sRequete);
 
             if (!$rLien) {
                 $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-                $this->vLog('critical', $sRequete);
+                $GLOBALS['oUtiles']->vLog('critical', $sRequete);
                 return false;
             }
         } else {
@@ -652,7 +652,7 @@ class CorePDO extends \PDO
         $this->sLog .= "==============================\n";
         $this->sLog .= "- Ligne existe ?\n";
         $this->sLog .= "----> $sRequete\n";
-        // $this->vLog('notice', $sRequete);
+        // $GLOBALS['oUtiles']->vLog('notice', $sRequete);
         $aElement = $this->aSelectBDD($sRequete);
 
         $aRetour['bExiste'] = empty($aElement) === false;
@@ -668,7 +668,7 @@ class CorePDO extends \PDO
             if (isset($aMappingChamps[$sAliasChamp]) === false) {
                 // Si le champ n'est pas présent dans le mappingchamp
                 // c'est une erreur grave ! On s'arrête !
-                $this->vLog('critical', 'Erreur : champ introuvable dans le mapping champ de ' . $sTable . ' : ' . $sAliasChamp);
+                $GLOBALS['oUtiles']->vLog('critical', 'Erreur : champ introuvable dans le mapping champ de ' . $sTable . ' : ' . $sAliasChamp);
                 return false;
             }
             if (preg_match('/_formate$/', $aMappingChamps[$sAliasChamp])) {
@@ -875,7 +875,7 @@ class CorePDO extends \PDO
 
         $aResultats = $this->aSelectBDD($sRequete);
 
-        foreach ($aResultats as $nIndex => $oTable) {
+        foreach ($aResultats as $oTable) {
 
             $sCle = 'Tables_in_'.$GLOBALS['aParamsBdd']['base'];
 
@@ -885,7 +885,7 @@ class CorePDO extends \PDO
 
             $aResultats = $this->aSelectBDD($sRequete);
 
-            foreach ($aResultats as $nIndex => $oChamp) {
+            foreach ($aResultats as $oChamp) {
 
                 $aType = explode('(', $oChamp->Type);
                 $sType = array_shift($aType);
@@ -1011,7 +1011,22 @@ class CorePDO extends \PDO
     }
 
     /**
-     *
+     * Affichage erreurs sur requête préparées
+     * @return string
+     */
+    protected function vLogErreurRequete(): string
+    {
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . $this->sDerniereRequete . '</pre>');
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . print_r($this->aChampPrepareDerniereRequete, true) . '</pre>');
+        $GLOBALS['oUtiles']->vLog('critical', '<pre>' .  'ERREUR SQL GRAVE : ' . $this->sDebugRequetePreparee(). '</pre>');
+
+        $GLOBALS['oUtiles']->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
+
+        return $this->sMessagePDO;
+    }
+
+    /**
+     * Affichage requête préparée avec intégration des paramètres à la requête principale pour afficher une requête exécutable en débug
      * @return string
      */
     public function sDebugRequetePreparee()
@@ -1043,21 +1058,6 @@ class CorePDO extends \PDO
     }
 
     /**
-     * @return string
-     */
-    protected function vLogErreurRequete(): string
-    {
-        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . $this->sDerniereRequete . '</pre>');
-        $GLOBALS['oUtiles']->vLog('critical', '<pre>' . print_r($this->aChampPrepareDerniereRequete, true) . '</pre>');
-        $GLOBALS['oUtiles']->vLog('critical', '<pre>' .  'ERREUR SQL GRAVE : ' . $this->sDebugRequetePreparee(). '</pre>');
-
-        $this->vLog('critical', 'sMessagePDO ----> ' . $this->sMessagePDO);
-
-        return $this->sMessagePDO;
-    }
-
-
-    /**
      * @param $e
      * @param $sCodeErreur
      */
@@ -1079,6 +1079,4 @@ class CorePDO extends \PDO
             }
         }
     }
-
-
 }
