@@ -1,5 +1,7 @@
 # Version courante : 2.0.1
 
+* **v2.0.7 : Renommage des dossiers pour respecter la casse attendue par l'autoloader**
+
 * **v1.0.54 : ajout du fichier licence.txt**
 
 * **v2.0.1 : Correctifs suite à la mise à jour, renommages, possibilité pour les critères de recherche d'emettre des messages d'erreur, type champ enum**
