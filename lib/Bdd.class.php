@@ -6,6 +6,7 @@ use APP\Core\Lib\Interne\PHP\Utiles;
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
+use APP\Ressources\Base\Lib\SelectMapping;
 
 class Bdd extends UndeadBrain
 {
@@ -238,38 +239,53 @@ class Bdd extends UndeadBrain
 
     /**
      * Initialise un RequeteBuilder avec des paramètres de requète basiques (
-     * @param $bModeCount
+     * @param bool|string $mModeCount si string alias de colonne count
      * @param $sGroupBy
      * @param $szOrderBy
-     * @param $nStart
-     * @param $nNbElements
      * @return RequeteBuilderInterface
      */
-    public function oConstruireRequete($bModeCount = false, $sGroupBy = '', $szOrderBy = '') : RequeteBuilderInterface
+    public function oConstruireRequete($mModeCount = false, $sGroupBy = '', $szOrderBy = '') : RequeteBuilderInterface
     {
         $oRequete = $this->oGetRequeteBuilder();
 
-        if ($bModeCount) {
+        if ($mModeCount) {
             $oRequete
-                ->oSelectCount();
-
+                ->oSelectCount($mModeCount);
         } else {
             $oRequete
                 ->oGroupBy($sGroupBy)
                 ->oInitOrderBy($szOrderBy);
         }
 
+        return $oRequete->oGroupBy($sGroupBy);
+    }
+
+    public function oGetSelection($oMapping, $bDistinct = false) : RequeteBuilderInterface
+    {
+        if (is_array($oMapping)) {
+            $oMapping = new SelectMapping(...$oMapping);
+        }
+
+        $oRequete = $this->oGetRequeteBuilder($oMapping);
+
+            $oRequete
+                ->oSelect([$oMapping->sNomChampId, $oMapping->sNomChampLibelle])
+                ->oInitOrderBy($oMapping->sGetOrderBy());
+
+            if ($bDistinct) {
+                $oRequete->oDistinct();
+            }
         return $oRequete;
     }
 
     /** Initialise un générateur de requêtes avec les paramètres du modèles et du type de connexion BDD
      * @return RequeteBuilderInterface
      */
-    protected function oGetRequeteBuilder() : RequeteBuilderInterface
+    protected function oGetRequeteBuilder($oMapping = null) : RequeteBuilderInterface
     {
         $cRequeteBuilder = $this->rConnexion->cTypeRequeteBuilder;
 
-        return new $cRequeteBuilder($this->aMappingChamps);
+        return new $cRequeteBuilder( $oMapping ?? $this->aMappingChamps);
     }
 
     /**
@@ -278,6 +294,7 @@ class Bdd extends UndeadBrain
     protected function szGetCriteresRecherche($aRecherche = [])
     {
         $this->oRecherche->vAjouterCriteresRecherche($aRecherche);
+
 
         return $this->oRecherche->sGetTexte();
     }
@@ -442,7 +459,7 @@ class Bdd extends UndeadBrain
      * Vérifie qu'une valeur d'un champ devant rester unique n'a pas déjà été choisie.
      * @oracle
      * @param  string $szTable  Table concernée.
-     * @param  string $szChamp  Champ à vérifier.
+     * @param  string $szChamp  champ à vérifier.
      * @param  string $szValeur Valeur à trouver.
      *
      * @return boolean          Existe ou non.
@@ -1018,5 +1035,13 @@ class Bdd extends UndeadBrain
 
     }
 
+//    public function oPagination($aRecherche = array(), $nNbElementsParPage = 0, $sContexte = '')
+//    {
+//        $nNbElements = $this->nGetNbElements($aRecherche, '', $sContexte);
+//        $nPage = $_REQUEST['nPage'] ?? 1;
+//        $oPagination = new Pagination($nNbElements, $nNbElementsParPage, $nPage);
+//
+//        return $oPagination;
+//    }
 
 }

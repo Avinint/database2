@@ -100,7 +100,7 @@ abstract class Champ
     public function sConvertirTableauValeurEnTexte(array $aValeur): string
     {
         return implode(', ', array_map(function ($mValeur) {
-            $this->sTraiterValeur($mValeur);
+            return $this->sTraiterValeur($mValeur);
         }, $aValeur));
     }
 

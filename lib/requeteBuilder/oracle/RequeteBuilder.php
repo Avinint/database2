@@ -82,7 +82,24 @@ FROM (
 
     public function sGetWhere()
     {
-        return $this->sWhere ? PHP_EOL . $this->sIndentation . $this->sWhere : '';
+        return $this->sWhere;
     }
 
+    /**
+     * Permet de spécifier un ordre de tri basé sur un champ en fonction de l'ordre des valeurs dans une liste
+     * (par exemple pour classer les états dans un ordre précis au lieu d'un ordre alphabétique)
+     * @param $sChampTri
+     * @param $listeValeursPourTri
+     * @return $this
+     */
+    public function TriParValeurs($sChampTri, $listeValeursPourTri)
+    {
+        $sListeValeurs = 'DECODE('.$sChampTri . ', ';
+        foreach ($listeValeursPourTri as $index => $valeur) {
+            $sListeValeurs .= "'$valeur'" . ', ' . $index . ', ';
+        }
+        $return  = rtrim($sListeValeurs, ', ') . ') ';
+
+        return $return;
+    }
 }

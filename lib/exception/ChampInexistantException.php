@@ -8,7 +8,7 @@ class ChampInexistantException extends \Exception
     {
         $cNomModele = str_replace('Mapping', '', $cNomMapping);
 
-        $sMessage = "Utilisation du Champ \"$sNomChamp\" inexistant dans $cNomMapping comme parametre de m&eacute;thode dans $cNomModele";
+        $sMessage = "Utilisation du champ \"$sNomChamp\" inexistant dans $cNomMapping comme parametre de m&eacute;thode dans $cNomModele";
 
         parent::__construct($sMessage);
     }

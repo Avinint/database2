@@ -28,7 +28,7 @@ class Recherche implements RechercheInterface
 
     /**
      * @var array
-     * a liste des critères spécifiques aux recherches sur le modèle en cours
+     * a liste des critères liés aux recherches sur le modèle en cours
      * (Recherches avec champs avec names permettant de savoir qu'on va utiliser des opérateurs
      * comme LIKE, NOT, >, <, etc.
      */
@@ -120,7 +120,7 @@ class Recherche implements RechercheInterface
     {
         if ($oCritere->bDoitEtreAjoute()) {
             if (empty($this->aCriteres)) {
-                $oCritere->vSetOperateurLogique('WHERE');
+                $oCritere->vSetOperateurLogique('');
             }
 
             if ($oCritere->nGetErreur()) {
