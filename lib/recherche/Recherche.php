@@ -48,7 +48,7 @@ class Recherche implements RechercheInterface
     public function vGenererRecherche($aRecherche)
     {
         $this->aRechercheBrut = $aRecherche;
-
+        $this->aCriteres = [];
         $aRechercheCritereSpecifique = array_intersect_key($aRecherche, $this->aListeCritereSpecifique);
 
         foreach ($aRechercheCritereSpecifique as $sCle => $sValeur) {
