@@ -5,6 +5,7 @@ namespace APP\Modules\Base\Lib\RequeteBuilder\MySQL;
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Champ\Oracle\CleEtrangere;
 use APP\Modules\Base\Lib\Mapping;
+use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 use APP\Ressources\Base\Lib\Exception\ChampInexistantException;
 
@@ -22,11 +23,13 @@ class RequeteBuilder implements RequeteBuilderInterface
     protected $nStart = 1;
     protected $nNbElements = 0;
     protected $sIndentation = '';
+    protected $oRecherche;
 
-    public function __construct($oMapping)
+    public function __construct($oMapping, Recherche $oRecherche = null)
     {
         $this->oMapping = $oMapping;
-        $this->sFrom = "{$this->oMapping->NomTable()} {$this->oMapping->sGetAlias()}";
+        $this->oRecherche = $oRecherche;
+        $this->sFrom = "{$this->oMapping->sNomTable()} {$this->oMapping->sGetAlias()}";
     }
 
 
@@ -357,7 +360,16 @@ class RequeteBuilder implements RequeteBuilderInterface
 
     public function oWhere($sCriteres)
     {
-        $this->sWhere .= $sCriteres ? PHP_EOL. $this->sIndentation . 'WHERE '  .  $sCriteres : '';
+        if ($sCriteres) {
+            if (!is_string($sCriteres)) {
+                $sCriteres = $this->szGetCriteresRecherche($sCriteres);
+            }
+
+            $this->sWhere .= $sCriteres ? PHP_EOL. $this->sIndentation . 'WHERE '  .  $sCriteres : '';
+
+        }
+
+
 
         return $this;
     }
@@ -381,5 +393,12 @@ class RequeteBuilder implements RequeteBuilderInterface
         return $this->oMapping[$sChamp] ?? null;
     }
 
+    /**
+     * @throws \Exception
+     */
+    protected function szGetCriteresRecherche($aRecherche = [])
+    {
+        return $this->oRecherche->vAjouterCriteresRecherche($aRecherche)->sGetTexte();
+    }
 
 }

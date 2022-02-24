@@ -35,10 +35,13 @@ class Recherche implements RechercheInterface
 
     /** Génération et mise en cache de la recherche si absente du cache
      * @param $aRecherche
+     * @return $this;
      */
     public function vAjouterCriteresRecherche($aRecherche)
     {
         $this->vGenererRecherche($aRecherche);
+
+        return $this;
     }
 
     /**
@@ -211,4 +214,6 @@ class Recherche implements RechercheInterface
     {
         return $this->aRechercheBrut;
     }
+
+
 }

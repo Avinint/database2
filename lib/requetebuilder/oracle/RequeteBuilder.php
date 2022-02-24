@@ -2,6 +2,7 @@
 
 namespace APP\Modules\Base\Lib\RequeteBuilder\Oracle;
 
+use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\MySQL\RequeteBuilder AS BaseRequeteBuilder;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 
@@ -15,10 +16,9 @@ class RequeteBuilder extends BaseRequeteBuilder
     protected $sOrderBy = '';
     protected $sHaving = '';
 
-    public function __construct($oMapping)
+    public function __construct($oMapping, Recherche $oRecherche = null)
     {
-        $this->oMapping = $oMapping;
-        $this->sFrom = "{$oMapping->sNomTable()} {$this->oMapping->sGetAlias()}";
+        parent::__construct($oMapping, $oRecherche);
         $this->sIndentation = str_repeat("\x20", 8);
     }
 

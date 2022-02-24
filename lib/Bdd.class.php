@@ -285,7 +285,9 @@ class Bdd extends UndeadBrain
     {
         $cRequeteBuilder = $this->rConnexion->cTypeRequeteBuilder;
 
-        return new $cRequeteBuilder( $oMapping ?? $this->aMappingChamps);
+        $oRequeteBuilder = new $cRequeteBuilder($oMapping ?? $this->aMappingChamps, $this->oRecherche);
+
+        return $oRequeteBuilder;
     }
 
     /**
@@ -293,10 +295,7 @@ class Bdd extends UndeadBrain
      */
     protected function szGetCriteresRecherche($aRecherche = [])
     {
-        $this->oRecherche->vAjouterCriteresRecherche($aRecherche);
-
-
-        return $this->oRecherche->sGetTexte();
+        return $this->oRecherche->vAjouterCriteresRecherche($aRecherche)->sGetTexte();
     }
 
     /**
