@@ -1,4 +1,6 @@
-# Version courante : 2.0.1
+# Version courante : 2.0.8
+
+* **v2.0.8 : Correctifs et nettoyage pour input multi recherche etc.**
 
 * **v1.0.54 : ajout du fichier licence.txt**
 
