@@ -28,17 +28,20 @@ class Recherche implements RechercheInterface
 
     /**
      * @var array
-     * a liste des critères spécifiques aux recherches sur le modèle en cours
+     * a liste des critères liés aux recherches sur le modèle en cours
      * (Recherches avec champs avec names permettant de savoir qu'on va utiliser des opérateurs
      * comme LIKE, NOT, >, <, etc.
      */
 
     /** Génération et mise en cache de la recherche si absente du cache
      * @param $aRecherche
+     * @return $this;
      */
     public function vAjouterCriteresRecherche($aRecherche)
     {
         $this->vGenererRecherche($aRecherche);
+
+        return $this;
     }
 
     /**
@@ -48,7 +51,7 @@ class Recherche implements RechercheInterface
     public function vGenererRecherche($aRecherche)
     {
         $this->aRechercheBrut = $aRecherche;
-
+        $this->aCriteres = [];
         $aRechercheCritereSpecifique = array_intersect_key($aRecherche, $this->aListeCritereSpecifique);
 
         foreach ($aRechercheCritereSpecifique as $sCle => $sValeur) {
@@ -120,7 +123,7 @@ class Recherche implements RechercheInterface
     {
         if ($oCritere->bDoitEtreAjoute()) {
             if (empty($this->aCriteres)) {
-                $oCritere->vSetOperateurLogique('WHERE');
+                $oCritere->vSetOperateurLogique('');
             }
 
             if ($oCritere->nGetErreur()) {
@@ -211,4 +214,6 @@ class Recherche implements RechercheInterface
     {
         return $this->aRechercheBrut;
     }
+
+
 }

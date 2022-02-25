@@ -5,6 +5,7 @@ namespace APP\Modules\Base\Lib\RequeteBuilder\MySQL;
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Champ\Oracle\CleEtrangere;
 use APP\Modules\Base\Lib\Mapping;
+use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 use APP\Ressources\Base\Lib\Exception\ChampInexistantException;
 
@@ -22,11 +23,13 @@ class RequeteBuilder implements RequeteBuilderInterface
     protected $nStart = 1;
     protected $nNbElements = 0;
     protected $sIndentation = '';
+    protected $oRecherche;
 
-    public function __construct($oMapping)
+    public function __construct($oMapping, Recherche $oRecherche = null)
     {
         $this->oMapping = $oMapping;
-        $this->sFrom = "{$this->oMapping->NomTable()} {$this->oMapping->sGetAlias()}";
+        $this->oRecherche = $oRecherche;
+        $this->sFrom = "{$this->oMapping->sNomTable()} {$this->oMapping->sGetAlias()}";
     }
 
 
@@ -41,9 +44,9 @@ class RequeteBuilder implements RequeteBuilderInterface
         return $this;
     }
 
-    public function oSelectCount() : RequeteBuilderInterface
+    public function oSelectCount($colonne = false) : RequeteBuilderInterface
     {
-        $this->aSelect[] =  'COUNT(*) AS "nNbElements"';
+        $this->aSelect[] =  'COUNT(*) AS "'. (is_string($colonne) ? $colonne : 'nNbElements') . '"';
 
         return $this;
     }
@@ -245,12 +248,16 @@ class RequeteBuilder implements RequeteBuilderInterface
 
     /** Permet d'ajouter des ORDER BY à la liste
      * @param $sOrderBy
-     * @return $this
+     * @return RequeteBuilderInterface $this
      */
-    public function oOrderBy($sOrderBy = '')
+    public function oOrderBy($sOrderBy = '', array $aTriParValeurs = []) : RequeteBuilderInterface
     {
         if (is_array($sOrderBy)) {
             $this->aOrderBy = array_flip(array_flip(array_merge($this->aOrderBy, array_map(function ($sUnOrderBy) { return $this->sParseOrderBy($sUnOrderBy); }, $sOrderBy))));
+        } elseif ($aTriParValeurs) {
+            [$sColonne, $sSens] = $this->sParseOrderBy($sOrderBy, true);
+            $this->aOrderBy[] = $this->TriParValeurs($sColonne, $aTriParValeurs). ' '. $sSens;
+
         } else {
             $this->aOrderBy[] = $this->sParseOrderBy($sOrderBy);
         }
@@ -259,17 +266,33 @@ class RequeteBuilder implements RequeteBuilderInterface
     }
 
     /**
+     * Permet de spécifier un ordre de tri basé sur un champ en fonction de l'ordre des valeurs dans une liste
+     * (par exemple pour classer les états dans un ordre précis au lieu d'un ordre alphabétique)
+     * @param $sChampTri
+     * @param $aTriParValeursPourTri
+     * @return $this
+     */
+    public function TriParValeurs($sChampTri, $aTriParValeursPourTri)
+    {
+        return 'FIELD('.$sChampTri . ', '  . implode(',', $aTriParValeursPourTri)  . ') ';
+    }
+
+    /**
      * Remplace les champs ajoutés à la clause ORDER BY par des colonnes préfixées des alias de table
      *
      * @param $sOrderBy
      * @return string
      */
-    public function sParseOrderBy($sOrderBy)
+    public function sParseOrderBy($sOrderBy, $tableau = false)
     {
-        [$sColonne, $sOrdre] = explode(" ", $sOrderBy) + ["", "DESC"];
+        [$sColonne, $sOrdre] = explode(" ", $sOrderBy) + ["", "ASC"];
 
         if ($oChamp = $this->oGetChamp($sColonne)) {
             $sColonne = $oChamp->sGetColonnePrefixee();
+        }
+
+        if ($tableau) {
+            return [$sColonne, $sOrdre];
         }
 
         return $sColonne . ' ' . $sOrdre;
@@ -287,7 +310,7 @@ class RequeteBuilder implements RequeteBuilderInterface
 
     protected function sGetJoins()
     {
-        return PHP_EOL . $this->sIndentation .  implode(PHP_EOL. $this->sIndentation, $this->aJoins);
+        return ($this->aJoins ? PHP_EOL . $this->sIndentation : '') .  implode(PHP_EOL. $this->sIndentation, $this->aJoins);
     }
 
     protected function sGetOrderBy()
@@ -337,7 +360,16 @@ class RequeteBuilder implements RequeteBuilderInterface
 
     public function oWhere($sCriteres)
     {
-        $this->sWhere .= $sCriteres ? PHP_EOL . $this->sIndentation .  $sCriteres : '';
+        if ($sCriteres) {
+            if (!is_string($sCriteres)) {
+                $sCriteres = $this->szGetCriteresRecherche($sCriteres);
+            }
+
+            $this->sWhere .= $sCriteres ? PHP_EOL. $this->sIndentation . 'WHERE '  .  $sCriteres : '';
+
+        }
+
+
 
         return $this;
     }
@@ -356,10 +388,17 @@ class RequeteBuilder implements RequeteBuilderInterface
      * @param string $sChamp
      * @return Champ|null
      */
-    public function oGetChamp(string $sChamp) : ?Champ
+    public function oGetChamp(?string $sChamp) : ?Champ
     {
         return $this->oMapping[$sChamp] ?? null;
     }
 
+    /**
+     * @throws \Exception
+     */
+    protected function szGetCriteresRecherche($aRecherche = [])
+    {
+        return $this->oRecherche->vAjouterCriteresRecherche($aRecherche)->sGetTexte();
+    }
 
 }

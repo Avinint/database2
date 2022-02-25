@@ -2,6 +2,7 @@
 
 namespace APP\Modules\Base\Lib\RequeteBuilder\Oracle;
 
+use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\MySQL\RequeteBuilder AS BaseRequeteBuilder;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
 
@@ -15,10 +16,9 @@ class RequeteBuilder extends BaseRequeteBuilder
     protected $sOrderBy = '';
     protected $sHaving = '';
 
-    public function __construct($oMapping)
+    public function __construct($oMapping, Recherche $oRecherche = null)
     {
-        $this->oMapping = $oMapping;
-        $this->sFrom = "{$oMapping->sNomTable()} {$this->oMapping->sGetAlias()}";
+        parent::__construct($oMapping, $oRecherche);
         $this->sIndentation = str_repeat("\x20", 8);
     }
 
@@ -82,7 +82,24 @@ FROM (
 
     public function sGetWhere()
     {
-        return $this->sWhere ? PHP_EOL . $this->sIndentation . $this->sWhere : '';
+        return $this->sWhere;
     }
 
+    /**
+     * Permet de spécifier un ordre de tri basé sur un champ en fonction de l'ordre des valeurs dans une liste
+     * (par exemple pour classer les états dans un ordre précis au lieu d'un ordre alphabétique)
+     * @param $sChampTri
+     * @param $listeValeursPourTri
+     * @return $this
+     */
+    public function TriParValeurs($sChampTri, $listeValeursPourTri)
+    {
+        $sListeValeurs = 'DECODE('.$sChampTri . ', ';
+        foreach ($listeValeursPourTri as $index => $valeur) {
+            $sListeValeurs .= "'$valeur'" . ', ' . $index . ', ';
+        }
+        $return  = rtrim($sListeValeurs, ', ') . ') ';
+
+        return $return;
+    }
 }

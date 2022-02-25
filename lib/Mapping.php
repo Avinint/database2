@@ -1,6 +1,6 @@
 <?php
 
-namespace APP\Modules\Base\Lib;
+namespace APP\Ressources\Base\Lib;
 
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Champ\Enum;
@@ -9,7 +9,7 @@ abstract class Mapping extends \ArrayObject
 {
     public $sNomChampId;
     public $sNomCle;
-    protected $sGetOrderBy;
+    protected $sOrderBy;
 
     public function sGetColonneAliasee($sCle)
     {

@@ -76,7 +76,4 @@ class Critere implements CritereInterface
         return $this->nErreur;
     }
 
-    protected function sGetValeurPourRecherche($oChamp, $mValeur)
-    {
-    }
 }
