@@ -6,7 +6,7 @@ class CriterePartiel extends Critere
 {
     public function __construct($oChamp, $mValeur)
     {
-        $mValeur = $oChamp->bEstRenseigne($mValeur) ?  $oChamp->sGetValeurEnregistree("%$mValeur%") : null;
+        $mValeur = $oChamp->bEstRenseigne($mValeur) ?  $this->sTraiterValeur($oChamp,"%$mValeur%") : null;
 
         parent::__construct($oChamp, $mValeur, 'LIKE');
     }
