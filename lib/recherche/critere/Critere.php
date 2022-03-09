@@ -42,10 +42,13 @@ class Critere implements CritereInterface
 
     /**
      * @param string $sOperateur
+     * @return Critere $this
      */
-    public function vSetOperateurLogique(string $sOperateur)
+    public function vSetOperateurLogique(string $sOperateur) : Critere
     {
         $this->sOperateurLogique = $sOperateur;
+
+        return $this;
     }
 
     public function __toString()

@@ -50,25 +50,23 @@ class Recherche implements RechercheInterface
      */
     public function vGenererRecherche($aRecherche)
     {
-        $this->aRechercheBrut = $aRecherche;
-        $this->aCriteres = [];
+        $this->aRechercheBrut        = $aRecherche;
+        $this->aCriteres             = [];
         $aRechercheCritereSpecifique = array_intersect_key($aRecherche, $this->aListeCritereSpecifique);
 
         foreach ($aRechercheCritereSpecifique as $sCle => $sValeur) {
             $oCritere = $this->oGenererCritereSpecifique($sCle);
+
             unset ($aRecherche[$sCle]);
 
-            if ($oCritere->bDoitEtreAjoute()) {
-                $this->vAjouterCritere($oCritere);
-            }
+            $this->vAjouterCritere($oCritere);
+
         }
 
         foreach ($aRecherche as $sCle => $sValeur) {
             if (isset($sValeur)) {
                 $oCritere = $this->oGenererCritere($sCle, $sValeur);
-                if (!$oCritere instanceof CritereInexistant || $oCritere->bDoitEtreAjoute()) {
-                    $this->vAjouterCritere($oCritere);
-                }
+                $this->vAjouterCritere($oCritere);
             }
         }
     }
@@ -81,17 +79,19 @@ class Recherche implements RechercheInterface
      */
     public function oGenererCritereSpecifique($sCle)
     {
-        [$sCle, $cCritere] = $this->aGetListeCritereSpecifique($sCle);
-
+        $cCritere = $this->aGetListeCritereSpecifique($sCle);
         $oChamp = $this->oGetChamp($sCle) ?? null;
 
         if ($oChamp) {
-            $oCritere = new $cCritere($oChamp, $this->aGetRechercheBrut());
-
-            return $oCritere;
+            return new $cCritere($oChamp, $this->aGetRechercheBrut());
+        } else {
+            try {
+                return new $cCritere($this->oMapping, $sCle, $this->aGetRechercheBrut());
+            } catch (Exception $e) {
+                return new CritereInexistant($cCritere);
+            }
         }
 
-        return new CritereInexistant($cCritere);
     }
 
     /**
@@ -116,12 +116,13 @@ class Recherche implements RechercheInterface
         }
     }
 
+
     /**
      * @param CritereInterface $oCritere
      */
     public function vAjouterCritere(CritereInterface $oCritere)
     {
-        if ($oCritere->bDoitEtreAjoute()) {
+        if (!$oCritere instanceof CritereInexistant && $oCritere->bDoitEtreAjoute()) {
             if (empty($this->aCriteres)) {
                 $oCritere->vSetOperateurLogique('');
             }
@@ -144,7 +145,9 @@ class Recherche implements RechercheInterface
 
     public function vAjouterCriteresSpecifiques($aCritere = [])
     {
-        $this->aListeCritereSpecifique = $aCritere;
+        if (count($aCritere) === 2) {
+            $this->aListeCritereSpecifique[$aCritere[0]] = $aCritere[1];
+        }
     }
 
     public function bCritereSpecifiqueExiste($sCle)
