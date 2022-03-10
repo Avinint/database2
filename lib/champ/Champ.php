@@ -174,4 +174,13 @@ abstract class Champ
         return $this->sAlias . '.' . $this->sColonne;
     }
 
+    /**
+     * @param string $format
+     * @return $this
+     */
+    public function oFormat(string $format) : Champ
+    {
+        return $this;
+    }
+
 }

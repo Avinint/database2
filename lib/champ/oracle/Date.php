@@ -2,6 +2,8 @@
 
 namespace APP\Modules\Base\Lib\Champ\Oracle;
 
+use APP\Modules\Base\Lib\Champ\Champ;
+
 class Date extends Char
 {
 //    protected $sFormatLibelle = 'DD/MM/YYYY';
@@ -64,5 +66,16 @@ class Date extends Char
     public function mGetValeur($mValeur)
     {
         return $mValeur ?? '';
+    }
+
+    /**
+     * @param string $format
+     * @return $this
+     */
+    public function oFormat(string $format) : Champ
+    {
+        $this->sFormatLibelle = $format;
+
+        return $this;
     }
 }

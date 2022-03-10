@@ -62,4 +62,15 @@ class Date extends Char
     {
         return $mValeur ?? '';
     }
+
+    /**
+     * @param string $format
+     * @return $this
+     */
+    public function oFormat(string $format) : Champ
+    {
+        $this->sFormatLibelle = $format;
+
+        return $this;
+    }
 }
