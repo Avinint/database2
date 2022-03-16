@@ -328,7 +328,7 @@ class CorePDO extends \PDO
 
         $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($oMapping, $aChamps, $aChampsNull);
         $sRequete = "UPDATE {$oMapping->sNomTable()} SET " . $aPreparationRequete['sRequete'] . "
-        WHERE $oMapping->sNomCle = :$oMapping->sNomCle";
+        WHERE {$oMapping->sNomCle()} = :{$oMapping->sNomCle()}";
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
         //On rajoute l'id élement dans les valeurs préparé pour qu'elle remplace le placeholder
 
@@ -518,6 +518,7 @@ class CorePDO extends \PDO
         $this->sDerniereRequete = $oRequetePrepare->queryString;
         $this->aChampPrepareDerniereRequete = $aChampsPrepare;
 
+
         try {
             $mResultat = $oRequetePrepare->execute($aChampsPrepare);
         } catch (\PDOException $e) {
@@ -531,7 +532,7 @@ class CorePDO extends \PDO
             $nCodeErreur = $e->getCode();
             $this->vLogErreurRequete();
         } finally {
-            $this->vGererErreurSurContrainte($e, $nCodeErreur);
+//            $this->vGererErreurSurContrainte($e, $nCodeErreur);
         }
 
         return $mResultat;
@@ -1036,6 +1037,7 @@ class CorePDO extends \PDO
 
         if (!empty($aChamps)) {
             foreach ($aChamps as $sChamp => $mValeur) {
+
                 if (is_object($mValeur) === true) {
                     if ($mValeur instanceof \DateTime) {
                         $mValeur = $mValeur->format('Y-m-d H:i:s');
@@ -1049,8 +1051,8 @@ class CorePDO extends \PDO
                 } elseif (is_array($mValeur) === true) {
                     $mValeur = implode(',', $mValeur);
                 }
-                $sRequete = str_replace(':'. $sChamp, $mValeur, $sRequete);
 
+                $sRequete = str_replace($sChamp, $mValeur, $sRequete);
                 //$sRequete = preg_replace('/:(\b' . str_replace(':', '', $sChamp) . '\b)/', $mValeur, $sRequete);
             }
         }
@@ -1078,5 +1080,65 @@ class CorePDO extends \PDO
                 }
             }
         }
+    }
+
+    /**
+     * Update avec critères de recherche
+     * @param $oMapping
+     * @param array $aChamps
+     * @param array $aChampsNull
+     * @param array $aRecherche
+     * @return bool|mixed
+     */
+    public function bUpdateWhere($oMapping, array $aChamps = [], array $aRecherche = [], array $aChampsNull = [])
+    {
+        $aRetour = ['bSucces' => false, 'aIdentifiantPourLog' => []];
+        $aPreparationRequete = $this->aPreparerChampsPlaceHolderRequete($oMapping, $aChamps, $aChampsNull);
+
+        $sRequete = "UPDATE {$oMapping->sNomTable()} SET " . $aPreparationRequete['sRequete'];
+
+        if (empty($aRecherche)) {
+            $sNomChampId = $oMapping->sNomChampId();
+            $sRequete .=  " WHERE {$oMapping->sNomCle()} = :$sNomChampId";
+            $oRequetePrepare = $this->oPreparerRequete($sRequete);
+
+            //On rajoute l'id élement dans les valeurs préparé pour qu'elle remplace le placeholder
+            $aPreparationRequete['aChampsPrepare'][':' . $sNomChampId] = $this->$sNomChampId;
+            $aRetour['identifiantPourLog'] = $this->$sNomChampId;
+        } else {
+            $aRequete = [];
+            if (array_key_exists('aParametres', $aRecherche)) {
+                unset($aRecherche['aParametres']);
+            }
+            $aCriteres = array_keys($aRecherche);
+            $aIdentifiantPourLog = [];
+            $arr = false;
+            foreach ($aCriteres as $sCritere) {
+                $sColonne = $oMapping[$sCritere]->sGetColonne();
+                $mValeur = $aRecherche[$sCritere];
+
+                if (is_array($mValeur)) {
+                    $arr = true;
+                    $mValeur = implode(', ', $mValeur);
+                    $aRequete[] =  " $sColonne IN ($mValeur)";
+                } else {
+                    $arr = false;
+                    if (is_string($mValeur)) {
+                        $mValeur = $this->quote($mValeur);
+                    }
+                    $aRequete[] =  " $sColonne = $mValeur";
+                }
+
+                $aIdentifiantPourLog[] = "$sColonne=$mValeur";
+            }
+
+            $sRequete .=  ' WHERE ' . implode (' AND ', $aRequete);
+            $oRequetePrepare = $this->oPreparerRequete($sRequete);
+            $aRetour['identifiantPourLog'] = implode('+', $aIdentifiantPourLog);
+        }
+
+        $aRetour['bSucces'] = $this->bExecuterRequetePrepare($oRequetePrepare, $aPreparationRequete['aChampsPrepare']);
+
+        return $aRetour;
     }
 }

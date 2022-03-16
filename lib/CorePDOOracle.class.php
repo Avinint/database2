@@ -21,6 +21,8 @@ class CorePDOOracle extends CorePDO
         $sRequete = "INSERT INTO {$oMapping->sNomTable()} (" .$sRequete . ')';
         $oRequetePrepare = $this->oPreparerRequete($sRequete);
 
+
+
 //        var_dump($sRequete);
 //        var_dump($aChampPrepare);
 //        die();
@@ -146,24 +148,19 @@ class CorePDOOracle extends CorePDO
         foreach ($aChamps as $sUnChamp => $sUneValeur) {
             /** @var Champ $oChamp */
             $oChamp = $oMapping[$sUnChamp];
-            $aColonne[] = $oChamp->sGetColonne();
-            $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
-//            if (($aType[$aChamps] ?? '')  === 'date') {
-//                $aLignes[] = "{$sUnChamp} = TO_DATE(:{$sUnChamp}, 'YYYY-MM-DD HH24:MI:SS)";
-//            } elseif (($aType[$aChamps] ?? '')  === 'timestamp') {
-//                $aLignes[] = "{$sUnChamp} = TO_TIMESTAMP(:{$sUnChamp}, 'YYYY-MM-DD HH24:MI:SS)";
-//            } elseif (($aType[$aChamps] ?? '')  === 'clob') {
-//                $aLignes[] = "{$sUnChamp} = TO_CLOB(:{$sUnChamp}";
-//
-//            } else {
-//                $aLignes[] = " {$sUnChamp} = :{$sUnChamp}";
-//            }
 
-            $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+            if (is_string($sUneValeur) && strpos($sUneValeur, ':') === 0) {
+                $aLignes[] = "{$oChamp->sGetColonne()} = " . str_replace(':', '', $sUneValeur);
+            } else {
+                $aColonne[] = $oChamp->sGetColonne();
+                $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
+
+                $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+            }
+
         }
 
         if ($aChampsNull) {
-
             foreach ($aChampsNull as $sUnChamp) {
                 $oChamp = $oMapping[$sUnChamp];
                 $aLignes[] = "{$oChamp->sGetColonne()} = NULL";

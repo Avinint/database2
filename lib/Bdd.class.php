@@ -749,34 +749,28 @@ class Bdd extends UndeadBrain
         }
 
         return $bRetour;
+    }
 
-//
-//        //Ici pas besoin de générer les champs préparé, on possède uniquement le champ nIdElement
-//        //On récupère le nom du champ contenant la clé primaire par le mapping champs
-//        $sNomChampId = $this->sGetNomChampId();
-//
-//        $aChampsPrepare = array(
-//            ':nIdElement' => $this->$sNomChampId
-//        );
-//
-//        $sRequete = "DELETE FROM {$this->sNomTable} WHERE {$this->sNomCle} = :nIdElement";
-//
-//        $oRequetePrepare = $this->oPreparerRequete($sRequete);
-//
-//        $bRetour = $this->bExecuterRequetePrepare($oRequetePrepare, $aChampsPrepare);
-//
-//        if($bRetour === false)
-//        {
-//            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
-//        }
-//        else
-//        {
-//            if ($this->bRessourceLogsPresente() && $this->sNomTable != 'logs') {
-//                $this->bSetLog("delete_{$this->sNomTable}", $this->$sNomChampId);
-//            }
-//        }
-//
-//        return $bRetour;
+    /**
+     * Modification de plusieurs éléments dans la bdd
+     * @param $aChamps
+     * @param $aRecherche
+     * @param $aChampsNull
+     * @return bool
+     */
+    public function bUpdateWhere($aChamps = [], $aRecherche = [], $aChampsNull = [])
+    {
+        $sNomTable = $this->sNomTable();
+
+        $aRetour = $this->rConnexion->bUpdateWhere($this->aMappingChamps, $aChamps, $aRecherche, $aChampsNull);
+
+        if ($aRetour['bSucces'] && $this->bRessourceLogsPresente() && $sNomTable != 'logs') {
+            $this->bSetLog("update_{$sNomTable}", $aRetour['aIdentifiantPourLog']);
+        } else {
+            $this->sMessagePDO = $this->rConnexion->sMessagePDO;
+        }
+
+        return $aRetour['bSucces'];
     }
 
     /**

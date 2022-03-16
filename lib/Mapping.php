@@ -68,4 +68,23 @@ abstract class Mapping extends \ArrayObject
     {
         return $this->sOrderBy ?? $this->sNomChampId . ' DESC';
     }
+
+    public function sNomCle()
+    {
+        return $this->sNomCle;
+    }
+
+    public function setNomTable($table)
+    {
+        $this->sNomTable = $table;
+
+        return $this;
+    }
+
+    public function setNomCle($cle)
+    {
+        $this->sNomCle = $cle;
+
+        return $this;
+    }
 }
