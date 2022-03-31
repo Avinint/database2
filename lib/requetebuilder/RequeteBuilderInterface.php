@@ -27,10 +27,10 @@ interface RequeteBuilderInterface
      * @param $sRestriction
      * @return $this
      */
-    function oLeftJoin($sTable, $sNomChamp, $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
-    function oRightJoin($sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
-    function oInnerJoin($sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
-    function oJoin($sType, $sTable, $sNomChamp, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
+    function oLeftJoin($sNomChamp, $sTable, $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
+    function oRightJoin($sNomChamp, $sTable, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
+    function oInnerJoin($sNomChamp, $sTable, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
+    function oJoin($sType, $sNomChamp, $sTable, $sAliasJointure, $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface;
 
     function oGroupBy($mGroupBy = '') : RequeteBuilderInterface;
     function oLimit($nStart, $nNbElements) : RequeteBuilderInterface;

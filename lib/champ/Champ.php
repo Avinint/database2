@@ -11,6 +11,7 @@ abstract class Champ
     protected $sColonne;
     protected $sAlias;
     protected $bEstNullable = true;
+    public static $bIsOracle = false;
     public static $rConnexion;
 
     public function __construct($sColonne, $sAlias = null)
@@ -181,6 +182,11 @@ abstract class Champ
     public function oFormat(string $format) : Champ
     {
         return $this;
+    }
+
+    public function sGetClePrimaire()
+    {
+        return '';
     }
 
 }

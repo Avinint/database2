@@ -6,6 +6,7 @@ use APP\Core\Lib\Interne\PHP\Utiles;
 use APP\Modules\Base\Lib\Champ\Champ;
 use APP\Modules\Base\Lib\Recherche\Recherche;
 use APP\Modules\Base\Lib\RequeteBuilder\RequeteBuilderInterface;
+use APP\Ressources\Base\Lib\Mapping;
 use APP\Ressources\Base\Lib\SelectMapping;
 
 class Bdd extends UndeadBrain
@@ -38,7 +39,7 @@ class Bdd extends UndeadBrain
      */
     public $sNomTable;
 
-    public $sLog;
+    public $sLog = '';
 
     private static $bPresenceRessourceLogs;
 
@@ -55,21 +56,21 @@ class Bdd extends UndeadBrain
     {
         $this->sMessagePDO = '';
 
-        $this->bIsOracle = $GLOBALS['aParamsBdd']['oracle'] ?? false;
+        $this->bIsOracle = Champ::$bIsOracle = $GLOBALS['aParamsBdd']['oracle'] ?? false;
         // echo ' bdd ';
         // echo '-------- avant <pre>'.print_r($this->rConnexion, true).'</pre>';
         if (isset($this->rConnexion) === false) {
             $this->vConnexionBdd();
         }
 
-        if (empty($this->sAlias)) {
-            $this->sAlias = substr($this->sNomTable,  0, 3);
-        }
+        if ($this->aMappingChamps instanceof Mapping) {
+            if (empty($this->sAlias)) {
+                $this->sAlias = substr($this->sNomTable,  0, 3);
+            }
 
-        $this->sLog = '';
-
-        if (empty($this->oRecherche)) {
-            $this->oRecherche = new Recherche($this->aMappingChamps);
+            if (empty($this->oRecherche)) {
+                $this->oRecherche = new Recherche($this->aMappingChamps);
+            }
         }
 
         $this->vInitialiseProprietes($nIdElement);
@@ -1027,6 +1028,20 @@ class Bdd extends UndeadBrain
         throw new \Exception("Mapping de la clé primaire {$this->sNomCle} non défini dans le tableau aMappingChamps");
 
     }
+    /**
+     * Retrouve un nom de colonne à partir d'un nom de champ
+     * @param $sChamp
+     * @return string
+     */
+    public function sGetColonne($sChamp)
+    {
+        if (is_array($this->aMappingChamps)) {
+            return array_flip($this->aMappingChamps)[$sChamp];
+        }
+
+        return $this->aMappingChamps[$sChamp]->sGetColonne();
+    }
+
 
 //    public function oPagination($aRecherche = array(), $nNbElementsParPage = 0, $sContexte = '')
 //    {

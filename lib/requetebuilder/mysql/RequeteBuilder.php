@@ -58,6 +58,13 @@ class RequeteBuilder implements RequeteBuilderInterface
         return $this;
     }
 
+    public function oFrom($sTable)
+    {
+        $this->sFrom = $sTable;
+
+        return $this;
+    }
+
     public function oConcat(array $aElementConcat, $sAlias, $sDelimiteur = '') : RequeteBuilderInterface
     {
         $aChamp = [];
@@ -160,6 +167,9 @@ class RequeteBuilder implements RequeteBuilderInterface
      */
     public function oJoin($sType, $sNomChamp, $sTable = '', $sAliasJointure = '', $sAlias = '', $sNomClePrimaire = '', $sRestriction = '') : RequeteBuilderInterface
     {
+        if (strpos($sNomChamp, '.')) {
+            [$sAlias, $sNomChamp] = explode('.', $sNomChamp);
+        }
         $oChamp = $this->oGetChamp($sNomChamp);
         if ($oChamp instanceof CleEtrangere && empty($sTable)) {
             $sTable = $oChamp->sGetTableCible();
@@ -168,12 +178,12 @@ class RequeteBuilder implements RequeteBuilderInterface
 
         if ($oChamp instanceof Champ) {
             $sNomColonne = $oChamp->sGetColonne();
-            $sNomClePrimaire = $sNomClePrimaire ? $this->oGetChamp($sNomClePrimaire)->sGetColonne() : $sNomColonne;
+
+            $sNomClePrimaire = $sNomClePrimaire ? $this->oGetChamp($sNomClePrimaire)->sGetColonne() : ($oChamp->sGetClePrimaire() ?: $sNomColonne);
+            $sAlias = $sAlias ?: $this->oMapping->sGetAlias();
         } else {
             throw new ChampInexistantException($sNomChamp, $this->sGetClasseMapping());
         }
-
-        $sAlias = $sAlias ?: $this->oMapping->sGetAlias();
 
         if ($sRestriction) {
             $sRestriction = ' '. $sRestriction;
@@ -231,7 +241,7 @@ class RequeteBuilder implements RequeteBuilderInterface
      * @param $sOrderBy
      * @return RequeteBuilderInterface
      */
-    public function oInitOrderBy($sOrderBy = '') : RequeteBuilderInterface
+    public function oInitOrderBy($sOrderBy = '', $aTriParValeurs = []) : RequeteBuilderInterface
     {
         if (empty($sOrderBy)) {
             $sOrderBy = $this->oMapping->sGetOrderBy();
@@ -239,6 +249,10 @@ class RequeteBuilder implements RequeteBuilderInterface
 
         if (is_array($sOrderBy)) {
             $this->aOrderBy = array_map(function ($sUnOrderBy) { return $this->sParseOrderBy($sUnOrderBy); }, $sOrderBy);
+        } elseif ($aTriParValeurs) {
+            /* TODO tester.. */
+            [$sColonne, $sSens] = $this->sParseOrderBy($sOrderBy, true);
+            $this->aOrderBy = [$this->TriParValeurs($sColonne, $aTriParValeurs) . ' ' . $sSens];
         } else {
             $this->aOrderBy = [$this->sParseOrderBy($sOrderBy)];
         }

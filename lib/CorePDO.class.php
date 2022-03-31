@@ -235,7 +235,7 @@ class CorePDO extends \PDO
             // echo '<pre>'.print_r($aResult, true).'</pre>';
 
             while($objRow = $rLien->fetch(\PDO::FETCH_OBJ)) {
-                $aResultat[] = $this->oGenererObjet($aMappingChamps, $objRow, $aResultat);
+                $aResultat[] = $this->oGenererObjet($aMappingChamps, $objRow);
 
                 // echo '<pre>'.print_r($objRow, true).'</pre>';
             }
@@ -960,11 +960,11 @@ class CorePDO extends \PDO
 
 
     /**
-     * @param Iterable $mMapping
+     * @param iterable|null $mMapping
      * @param $objRow
      * @return object
      */
-    protected function oGenererObjet(Iterable $mMapping, $objRow): object
+    protected function oGenererObjet(?Iterable $mMapping = [], $objRow): object
     {
         if (is_iterable($mMapping) && count($mMapping)) {
             $objResultat = new \StdClass();

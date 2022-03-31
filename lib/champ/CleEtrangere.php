@@ -6,13 +6,15 @@ class CleEtrangere extends Nombre
 {
     private $sTableCible;
     private $sAliasTableCible;
+    private $sNomClePrimaire;
 
-    public function __construct($sColonne, $sTableCible, $sAliasTableCible, $sAlias = null)
+    public function __construct($sColonne, $sTableCible, $sAliasTableCible, $sAlias = null, $sNomClePrimaire = '')
     {
         $this->sColonne = $sColonne;
         $this->sAlias   = $sAlias;
         $this->sTableCible = $sTableCible;
         $this->sAliasTableCible = $sAliasTableCible;
+        $this->sNomClePrimaire = $sNomClePrimaire;
     }
 
     public function sGetTableCible()
@@ -30,5 +32,10 @@ class CleEtrangere extends Nombre
         $this->sAliasTableCible = $sAliasTableCible;
 
         return $this;
+    }
+
+    public function sGetClePrimaire()
+    {
+        return $this->sNomClePrimaire;
     }
 }
