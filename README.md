@@ -1,5 +1,7 @@
 # Version courante : 2.0.8
 
+* **v2.0.14 : Correctif du tri.**
+
 * **v2.0.8 : Correctifs et nettoyage pour input multi recherche etc.**
 
 * **v2.0.7 : Renommage des dossiers pour respecter la casse attendue par l'autoloader**

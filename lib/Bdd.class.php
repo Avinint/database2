@@ -165,6 +165,8 @@ class Bdd extends UndeadBrain
                 elseif ($this->bIsOracle) {
                     $szBase = 'oci:dbname=//' . $sHote . '/' . $sNomBase . ';charset=al32utf8';
                     self::$aConnexionStatic[$sAliasConnexion] = new CorePDOOracle($szBase, $sUtilisateur, $sMotDePasse);
+                    self::$aConnexionStatic[$sAliasConnexion]->query('ALTER SESSION SET NLS_SORT=BINARY_CI');
+                    self::$aConnexionStatic[$sAliasConnexion]->query('ALTER SESSION SET NLS_COMP=LINGUISTIC');
                 } else {
                     $szBase = 'mysql:host=' . $sHote . ';dbname=' . $sNomBase . ';charset=utf8';
                     self::$aConnexionStatic[$sAliasConnexion] = new CorePDO($szBase, $sUtilisateur, $sMotDePasse);
@@ -314,7 +316,7 @@ class Bdd extends UndeadBrain
     {
         $szRequete = $this->szGetSelect($aRecherche, $szOrderBy, false, $nStart, $nNbElements, $szGroupBy, $szContexte);
 //        $szRequete = $this->sPaginerRequete($nNbElements, $nStart, $szRequete);
-        // echo '<pre>'.$szRequete.'</pre>';
+    //     echo '<pre>'.$szRequete.'</pre>';
 
         $aResultats = $this->aSelectBDD($szRequete, $this->aMappingChamps);
 
