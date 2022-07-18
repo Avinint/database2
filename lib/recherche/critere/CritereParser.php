@@ -10,7 +10,7 @@ use APP\Core\Lib\Interne\PHP\Utiles;
  */
 class CritereParser extends Utiles
 {
-    const SUFFIXES = ['Min', 'Max', 'Different', 'Partiel', 'Gauche', 'Droite', 'Difference', 'Liste', 'HorsListe'];
+    const SUFFIXES = ['Min', 'Max', 'Different', 'Partiel', 'Gauche', 'Droite', 'Difference', 'Liste', 'HorsListe', 'Null', 'NonNull'];
     // METTRE UN TABLEAU EN VALEUR ? Pour les LIKE et les IN ?
 
     public static function oDeduireCritere($sCle, $mValeur, $oMapping) : CritereInterface

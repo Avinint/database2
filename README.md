@@ -1,5 +1,7 @@
 # Version courante : 2.0.8
 
+* **v2.0.15 : Ajout des types de critère "Null" et "NonNull" (respectivement pour IS NULL et IS NOT NULL).**
+
 * **v2.0.14 : Correctif du tri.**
 
 * **v2.0.8 : Correctifs et nettoyage pour input multi recherche etc.**
