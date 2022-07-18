@@ -1,4 +1,6 @@
-# Version courante : 2.0.8
+# Version courante : 2.0.16
+
+* **v2.0.16 : Correction déduction des critères.**
 
 * **v2.0.15 : Ajout des types de critère "Null" et "NonNull" (respectivement pour IS NULL et IS NOT NULL).**
 
