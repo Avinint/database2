@@ -15,7 +15,7 @@ class Texte extends Char
     }
     public function mGetValeur($mValeur)
     {
-        if (is_ressource($mValeur)) {
+        if (is_resource($mValeur)) {
             $sRetour = stream_get_contents($mValeur);
         } else {
             $sRetour = $mValeur;
