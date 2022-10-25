@@ -15,6 +15,11 @@ class Texte extends Char
     }
     public function mGetValeur($mValeur)
     {
-        return stream_get_contents($mValeur);
+        if (is_ressource($mValeur)) {
+            $sRetour = stream_get_contents($mValeur);
+        } else {
+            $sRetour = $mValeur;
+        }
+        return $sRetour;
     }
 }
