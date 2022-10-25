@@ -1,4 +1,6 @@
-# Version courante : 2.0.16
+# Version courante : 2.0.18
+
+* **v2.0.18 : Correctif pour rétro-compatibilité type Texte (sur un varchar).**
 
 * **v2.0.17 : Correction type CLOB en lecture (Texte.php).**
 
