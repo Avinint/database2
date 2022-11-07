@@ -11,7 +11,7 @@ class Texte extends Char
 
     public function sGenererPlaceholderChampPrepare()
     {
-        return "TO_CLOB(:$this->sColonne)";
+        return ":$this->sColonne";
     }
     public function mGetValeur($mValeur)
     {

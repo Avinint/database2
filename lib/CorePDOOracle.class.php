@@ -152,10 +152,18 @@ class CorePDOOracle extends CorePDO
             if (is_string($sUneValeur) && strpos($sUneValeur, ':') === 0) {
                 $aLignes[] = "{$oChamp->sGetColonne()} = " . str_replace(':', '', $sUneValeur);
             } else {
+                $sClob = '';
                 $aColonne[] = $oChamp->sGetColonne();
-                $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
-
-                $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+                if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
+                    for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
+                        $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
+                    }
+                    $sClob = substr($sClob,0,strlen($sClob) - 4);
+                    $aLignes[] = "{$oChamp->sGetColonne()} = $sClob";
+                }else{
+                    $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
+                    $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+                }
             }
 
         }
@@ -168,7 +176,6 @@ class CorePDOOracle extends CorePDO
         }
 
         $aRetour['sRequete'] = implode(', ', $aLignes);
-
         return $aRetour;
     }
 
