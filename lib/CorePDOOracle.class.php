@@ -99,10 +99,19 @@ class CorePDOOracle extends CorePDO
 
         foreach ($aChamps as $sUnChamp => $sUneValeur) {
             $oChamp = $oMapping[$sUnChamp];
+            //var_dump($oChamp);
             $aColonne[] = $oChamp->sGetColonne();
-            $aValeur[] = $oChamp->sGenererPlaceholderChampPrepare();
-
-            $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+            $sClob = '';
+            if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
+                for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
+                    $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
+                }
+                $sClob = substr($sClob,0,strlen($sClob) - 4);
+                $aValeur[] = "$sClob";
+            }else{
+                $aValeur[] = $oChamp->sGenererPlaceholderChampPrepare();
+                $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
+            }
         }
 
         if ($aChampsNull) {
@@ -115,7 +124,6 @@ class CorePDOOracle extends CorePDO
         }
 
         $aRetour['sRequete'] = implode(', ', $aColonne) . ') VALUES(' . implode(', ', $aValeur);
-
         return $aRetour;
     }
 
