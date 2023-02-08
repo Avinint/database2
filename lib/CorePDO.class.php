@@ -520,7 +520,30 @@ class CorePDO extends \PDO
 
 
         try {
-            $mResultat = $oRequetePrepare->execute($aChampsPrepare);
+            //$mResultat = $oRequetePrepare->execute($aChampsPrepare);
+            $aChampsPasEncorePrepares = array();
+            foreach($this->aChampPrepareDerniereRequete as $sChampPrepare => &$mUnChampPrepare) {
+                if (is_array($mUnChampPrepare) && isset($mUnChampPrepare['sValeur'])) {
+                    if (isset($mUnChampPrepare['nMaxSize'])) {
+                        $nMaxSize = $mUnChampPrepare['nMaxSize'];
+                    } else {
+                        $nMaxSize = 0;
+                    }
+                    if (isset($mUnChampPrepare['nTypePDO'])) {
+                        $nTypePDO = $mUnChampPrepare['nTypePDO'];
+                    } else {
+                        $nTypePDO = \PDO::PARAM_STR;
+                    }
+                    $oRequetePrepare->bindParam($sChampPrepare, $mUnChampPrepare['sValeur'], $nTypePDO, $nMaxSize);
+                    $mUnChampPrepare = $mUnChampPrepare['sValeur'];
+                } else {
+                    $oRequetePrepare->bindParam($sChampPrepare, $mUnChampPrepare);
+                    
+                    //$aChampsPasEncorePrepares[$sChampPrepare] = $mUnChampPrepare;
+                }
+                
+            }
+            $mResultat = $oRequetePrepare->execute();
         } catch (\PDOException $e) {
             /**
              * Contient les infos sur l'erreur SQL :
@@ -529,6 +552,7 @@ class CorePDO extends \PDO
              * [2] => Message d'erreur spécifique au driver
              * @var array $infosErreur
              */
+            error_log($e->getMessage());
             $nCodeErreur = $e->getCode();
             $this->vLogErreurRequete();
         } finally {

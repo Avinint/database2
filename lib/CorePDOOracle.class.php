@@ -101,15 +101,21 @@ class CorePDOOracle extends CorePDO
             $oChamp = $oMapping[$sUnChamp];
             //var_dump($oChamp);
             $aColonne[] = $oChamp->sGetColonne();
-            $sClob = '';
-            if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
-                for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
-                    $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
-                }
-                $sClob = substr($sClob,0,strlen($sClob) - 4);
-                $aValeur[] = "$sClob";
-            }else{
-                $aValeur[] = $oChamp->sGenererPlaceholderChampPrepare();
+            //$sClob = '';
+            //if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
+            $aValeur[] = $oChamp->sGenererPlaceholderChampPrepare();
+            if (is_a($oChamp, '\APP\Modules\Base\Lib\Champ\Oracle\Texte')) {
+                // for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
+                //     $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
+                // }
+                // $sClob = substr($sClob,0,strlen($sClob) - 4);
+                // $aValeur[] = "$sClob";
+                $sValeurFormatee = $oChamp->sFormatterValeurSQL($sUneValeur);
+                $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = array(
+                    'sValeur' => $sValeurFormatee
+                    ,'nMaxSize' => strlen($sValeurFormatee)
+                );
+            } else {
                 $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
             }
         }
@@ -162,14 +168,26 @@ class CorePDOOracle extends CorePDO
             } else {
                 $sClob = '';
                 $aColonne[] = $oChamp->sGetColonne();
-                if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
-                    for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
-                        $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
-                    }
-                    $sClob = substr($sClob,0,strlen($sClob) - 4);
-                    $aLignes[] = "{$oChamp->sGetColonne()} = $sClob";
+                $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
+                if (is_a($oChamp, '\APP\Modules\Base\Lib\Champ\Oracle\Texte')) {
+                    // for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
+                    //     $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
+                    // }
+                    // $sClob = substr($sClob,0,strlen($sClob) - 4);
+                    // $aValeur[] = "$sClob";
+                    $sValeurFormatee = $oChamp->sFormatterValeurSQL($sUneValeur);
+                    $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = array(
+                        'sValeur' => $sValeurFormatee
+                        ,'nMaxSize' => strlen($sValeurFormatee)
+                    );
+                // if (is_string($sUneValeur) && strlen($sUneValeur) > 4000){
+                //     for($i = 0; $i < strlen($sUneValeur)/4000; $i++ ){
+                //         $sClob .= 'TO_CLOB(\''.substr($sUneValeur,$i*4000 + ($i * 1),($i+1)*4000).'\') || ';
+                //     }
+                //     $sClob = substr($sClob,0,strlen($sClob) - 4);
+                //     $aLignes[] = "{$oChamp->sGetColonne()} = $sClob";
                 }else{
-                    $aLignes[] = "{$oChamp->sGetColonne()} = {$oChamp->sGenererPlaceholderChampPrepare()}";
+                    
                     $aRetour['aChampsPrepare'][":{$oChamp->sGetColonne()}"] = $oChamp->sFormatterValeurSQL($sUneValeur);
                 }
             }

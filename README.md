@@ -1,4 +1,6 @@
-# Version courante : 2.0.20
+# Version courante : 2.0.21
+
+* **v2.0.21 : Correctif supplémentaire sur l'insertion des chaines de plus de 4000 caractéres(CLOB)**
 
 * **v2.0.20 : Correction de l'insertion des chaines de plus de 4000 caractéres(CLOB)**
 
